@@ -4,6 +4,25 @@
   
     
     <entry>
+      <title>23/6/21 算法每日一题</title>
+      <link href="/2023/06/21/2023-6-21-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
+      <url>/2023/06/21/2023-6-21-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
+      
+        <content type="html"><![CDATA[<p>题目:<a href="https://www.acwing.com/activity/content/problem/content/8434/">AcWing 4908.饥饿的牛</a></p><p>贝茜是一头饥饿的牛。每天晚上，如果牛棚中还有干草的话，贝茜都会吃掉其中的一捆。</p><p>初始时，牛棚中没有干草。</p><p>为了让贝茜不被饿死，农夫约翰制定了N个给贝茜送干草的计划。</p><p>其中第 i个计划是在第 di天的白天给贝茜送去 bi捆干草。</p><p>这些计划互不冲突，保证 1≤d1&lt;d2&lt;…&lt;dN≤T。</p><p>请你计算，贝茜在第 1∼T天中有多少天有干草吃。</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ACW4908 hunger cow</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> n,t;<span class="comment">//送n次草,共t天</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> di,bi,cao=<span class="number">0</span>,last=<span class="number">0</span>;<span class="comment">//当前送草日,当前送草量,上次更新的库存草料数,上次送草日</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> fullDay=<span class="number">0</span>;<span class="comment">//吃饱天数</span></span><br><span class="line">    </span><br><span class="line">    cin&gt;&gt;n&gt;&gt;t;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>(n--)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">&quot;%lld %lld&quot;</span>,&amp;di,&amp;bi);</span><br><span class="line">        <span class="keyword">if</span>(di-last&gt;cao)<span class="comment">//中间挨饿了</span></span><br><span class="line">        &#123;</span><br><span class="line">            fullDay+=cao;</span><br><span class="line">            cao=bi;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            cao-=(di-last);</span><br><span class="line">            cao+=bi;</span><br><span class="line">            fullDay+=di-last;</span><br><span class="line">        &#125;</span><br><span class="line">        last=di;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//处理最后一次送草的余料</span></span><br><span class="line">    <span class="keyword">if</span>(cao&gt;=(t-last+<span class="number">1</span>)) fullDay+=(t-last+<span class="number">1</span>);<span class="comment">//够吃到结束</span></span><br><span class="line">    <span class="keyword">else</span> fullDay+=cao;<span class="comment">//不够吃到结束</span></span><br><span class="line">    cout&lt;&lt;fullDay&lt;&lt;endl;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法学习 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>23年大二下硬件课设</title>
       <link href="/2023/06/20/2023-6-20-23%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/"/>
       <url>/2023/06/20/2023-6-20-23%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/</url>
