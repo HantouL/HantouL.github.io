@@ -4,6 +4,25 @@
   
     
     <entry>
+      <title>23/7/14 算法每日一题</title>
+      <link href="/2023/07/14/2023-7-10-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
+      <url>/2023/07/14/2023-7-10-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
+      
+        <content type="html"><![CDATA[<h2 id="题目-游游的数组染色"><a href="#题目-游游的数组染色" class="headerlink" title="题目:游游的数组染色"></a>题目:<a href="https://ac.nowcoder.com/acm/contest/60245/B">游游的数组染色</a></h2><p>游游拿到了一个数组，其中一些数被染成红色，一些数被染成蓝色。<br>游游想知道，取两个不同颜色的数，且它们的数值相等，有多少种不同的取法？<br>我们定义，两种取法如果取的某个数在原数组的位置不同，则定义为不同的取法。</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;map&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> N = <span class="number">2e5</span> + <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="type">long</span> a[N];</span><br><span class="line"><span class="type">char</span> c[N];</span><br><span class="line"></span><br><span class="line">map&lt;<span class="type">int</span>, <span class="type">int</span>&gt; m[<span class="number">2</span>];<span class="comment">//R对应0,B对应1</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) <span class="built_in">scanf</span>(<span class="string">&quot;%lld&quot;</span>, &amp;a[i]);</span><br><span class="line">    cin &gt;&gt; c;</span><br><span class="line"></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> ans = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        ans += m[c[i] == <span class="string">&#x27;B&#x27;</span>][a[i]];</span><br><span class="line">        m[c[i] == <span class="string">&#x27;R&#x27;</span>][a[i]]++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; ans &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法学习 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>23/7/8 算法每日一题</title>
       <link href="/2023/07/08/2023-7-8-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
       <url>/2023/07/08/2023-7-8-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
