@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>RocketMQ概述与基本概念</title>
+      <link href="/2023/09/17/%E7%AC%AC%E4%B8%80-%E4%BA%8C%E7%AB%A0-RocketMQ%E6%A6%82%E8%BF%B0/"/>
+      <url>/2023/09/17/%E7%AC%AC%E4%B8%80-%E4%BA%8C%E7%AB%A0-RocketMQ%E6%A6%82%E8%BF%B0/</url>
+      
+        <content type="html"><![CDATA[<h1 id="第一章-RocketMQ概述"><a href="#第一章-RocketMQ概述" class="headerlink" title="第一章 RocketMQ概述"></a>第一章 RocketMQ概述</h1><h2 id="一-、MQ概述"><a href="#一-、MQ概述" class="headerlink" title="一 、MQ概述"></a>一 、MQ概述</h2><h3 id="MQ简介"><a href="#MQ简介" class="headerlink" title="MQ简介"></a>MQ简介</h3><p>Message Queue消息队列,是一种提供消息队列服务的中间件,也称为消息中间件,是一套提供了信息生产,储存,消费全过程的API软甲系统</p><h3 id="MQ用途"><a href="#MQ用途" class="headerlink" title="MQ用途"></a>MQ用途</h3><h4 id="1-流量削峰"><a href="#1-流量削峰" class="headerlink" title="1.流量削峰"></a><strong>1.流量削峰</strong></h4><p>MQ可以将系统的<strong>超量</strong>请求暂存其中,以便后期系统可以慢慢处理,从而避免了请求的丢失或者系统宕机</p><h4 id="2-异步解耦"><a href="#2-异步解耦" class="headerlink" title="2.异步解耦"></a><strong>2.异步解耦</strong></h4><p>上游系统对下游系统的调用若为同步调用,则会大大降低系统的吞吐量与并发度,且系统耦合度太高;异步调用可以通过在上下游间添加一个<strong>MQ层</strong>来解决这些问题</p><h4 id="3-数据收集"><a href="#3-数据收集" class="headerlink" title="3.数据收集"></a>3.<strong>数据收集</strong></h4><p>分布式系统会产生海量数据流,如:业务日志,监控数据,用户行为等;针对这些数据流进行实时或批量采集汇总,然后对这些数据流进行大数据分析,是当前互联网平台的必备技术,通过MQ完成此类数据收集是最好的选择</p><h1 id="第二章-RocketMQ的安装与启动"><a href="#第二章-RocketMQ的安装与启动" class="headerlink" title="第二章 RocketMQ的安装与启动"></a>第二章 RocketMQ的安装与启动</h1><h2 id="一、基本概念"><a href="#一、基本概念" class="headerlink" title="一、基本概念"></a>一、基本概念</h2><h3 id="1-消息-Message"><a href="#1-消息-Message" class="headerlink" title="1.消息 Message"></a>1.消息 Message</h3><p>消息是消息系统所传输信息的物理载体,生产和消费数据的最小单位,每条消息必须属于一个主题</p><h3 id="2-主题-Topic"><a href="#2-主题-Topic" class="headerlink" title="2.主题 Topic"></a>2.主题 Topic</h3><p>Topic表示一类消息的<strong>集合</strong>，每个主题包含若干条消息，每条消息只能属于一个主题，是RocketMQ进行<strong>消息订阅的基本单位</strong>。</p><p>一个生产者可以同时发送多种Topic的消息;而一个消费者只对某种特定的Topic感兴趣，即<u>一个消费者只可以订阅和消费一种Topic的消息</u>。</p><h3 id="3-标签-Tag"><a href="#3-标签-Tag" class="headerlink" title="3.标签  Tag"></a>3.标签  Tag</h3><p>Tag是为消息设置的标签,用于区别同一Topic下的不同类型的消息;</p><p><u>即Topic是消息的一级分类,Tag是消息的二级分类</u></p><h3 id="4-队列-Queue"><a href="#4-队列-Queue" class="headerlink" title="4.队列 Queue"></a>4.队列 Queue</h3><p>存储消息的物理实体,一个Topic中可以包含多个Queue(一个Queue中的消息只能被一个消费者组中的一个消费者消费;一个Queue中的消息不允许同一个消费者组的多个消费者同时消费),每个Queue中存放的就是该Topic的消息</p><p>一个Topic的Queue也被称为一个Topic中消息的分区</p><blockquote><p>分片:在RocketMQ中,分片指的是存放响应Topic的Broker数量;每个分片会创建相应数量的分区,即Queue,每个Queue的大小应该是相同的</p></blockquote><h3 id="5-消息标示-MessageId-Key"><a href="#5-消息标示-MessageId-Key" class="headerlink" title="5.消息标示 MessageId/Key"></a>5.消息标示 MessageId/Key</h3><p>RocketMQ中每个消息拥有唯一的Messageld，且可以携带具有业务标识的Key，以方使对消息的查询。不过需要注意的是，MessageId有两个:在生产者send()消息时会自动生成一个Messageld (msgld),当消息到达Broker后,其也会自动生成一个MessageId(offsetId)</p><ul><li>msgld: 田producer端生成，具生成规则为:</li></ul><p>​        <strong>producerIp +进程pid + MessageclientIDSetter类的c1assLoader的hashcode +当前时间+ AutomicInteger自增计数器</strong></p><ul><li>offsetMsgld:由broker端生成，其生成规则为: brokerIp +物理分区的offset(Queue中的偏移量)</li><li>key:由用户指定的业务相关的唯一标识</li></ul><h2 id="二、系统架构"><a href="#二、系统架构" class="headerlink" title="二、系统架构"></a>二、系统架构</h2><h3 id="1-Producer-生产者"><a href="#1-Producer-生产者" class="headerlink" title="1.Producer  生产者"></a>1.Producer  生产者</h3><p>消息生产者,负责生产消息,其通过MQ的负载均衡模块选择响应的Broker集群队列进行消息投递,投递过程支持快速失败且低延迟</p><p>RocketMQ中消息生产者都是以<strong>生产者组</strong>的形式出现的,生产者组是同一类生产者的集合,这类Producer<strong>都能(不是仅能)</strong>发送相同Topic类型的消息</p><h3 id="2-Consumer-消费者"><a href="#2-Consumer-消费者" class="headerlink" title="2.Consumer 消费者"></a>2.Consumer 消费者</h3><p>消息消费者,负责消费消息,一个消费者会从Broker服务器中获取消息,并对消息进行相关业务处理</p><p>RocketMQ中的消息消费者都是以<strong>消费者组</strong>的形式出现的,其是同一类消费者的集合,这类Consumer消费的是同一个Topic类型的消息,消费者组的存在使得<strong>负载均衡</strong>(指的是将一个Topic中不同的Queue平均分配给同一个Consumer Group的不同的Consumer,并不是Message的消息负载均衡)和<strong>容错</strong>(一个Consumer挂了,该消费者组中的其他Consumer可以接着消费原Consumer消费的Queue)的实现变得容易</p><blockquote><p>同一个生产者可以生产多种不同消息,而同一个消费者只能生产同一种消息</p><p>不过一个Topic类型的消息可以同时呗多个消费者组同时消费</p></blockquote><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202309181321830.png" alt="image-20230918132127582"></p><blockquote><p>注意:</p><p>1)一个消费者组中的消费者必须订阅完全相同的Topic</p><p>2)消费者组只能消费一个Topic的消息,不能同时消费多个Topic消息</p></blockquote><h3 id="3-Name-Server"><a href="#3-Name-Server" class="headerlink" title="3.Name Server"></a>3.Name Server</h3><h4 id="功能介绍"><a href="#功能介绍" class="headerlink" title="功能介绍"></a>功能介绍</h4><p>NameServer是一个Broker与Topic路由的注册中心,支持Broker的动态注册与发现</p><p>主要包括两个功能</p><ul><li><strong>Broker管理</strong>:接受Broker集群的注册信息并保存下来作为路由信息的基本数据;提供心跳检测</li><li><strong>路由信息管理</strong>:每个NameServer中都保存着Broker集群的整个路由信息和用于客户端查询的队列信息;Producer和Consumer通过NameServer可以获取整个Broker集群的路由信息,从而进行消息的投递和消费</li></ul><h4 id="路由注册"><a href="#路由注册" class="headerlink" title="路由注册"></a>路由注册</h4><p>NameServer通常是集群部署,不过NameServer是无状态的(集群中各个节点无差异),集群中各节点间不进行相互的信息通讯</p><p>节点中的数据是如何同步的呢?</p><p>在Broker结点启动时,轮询NameServer结点建立长连接,发起注册请求,在NameServer内部维护者一个Broker列表用来动态存储Broker信息</p><blockquote><p>注意 这是与其他如zk,Eureka,Nacos等注册中心不同的</p><p>NameServer的无状态方式的优缺点</p><ul><li><p>优点:搭建简单,扩容简单-</p></li><li><p>缺点:对于Broker,必须要明确指示所有NameServer地址,否则为指出的NameServer将不会被注册;因此,NameServer并不能随意扩容,因为若Broker不重新配置,新增的NameServer对于Broker不可见</p></li></ul></blockquote><p>Broker节点为了维持自己的存活,为了维护与NameServer的长连接,会将最新消息以<strong>心跳包</strong>的方式上报给NameServer,30s一次;NameServer在收到心跳包后会更新心跳时间戳,记录这个Broker的最新存活时间</p><h4 id="路由剔除"><a href="#路由剔除" class="headerlink" title="路由剔除"></a>路由剔除</h4><p>若NameServer未及时收到Broker的心跳,NameServer可能会将其从Broker列表中剔除</p><p>NameServer每10秒扫描一次Broker表,若发现Broker的心跳时间戳距今超过120s则判定其失效,将其从Broker列表中剔除</p><blockquote><p>扩展:对于Rocket的日常运维,需要暂停Broker的工作,管理员需要怎么做?</p><p>OP需要将Broker的读写权限暂时禁用,若client向broker发送请求,则会收到broker的NO_PERMISSION响应,然后client会向其他Broker发送重试请求</p><p>当OP发现这个Broker没有流量后,再将其关闭,实现Broker从NameServer中的移除</p></blockquote><h4 id="路由发现"><a href="#路由发现" class="headerlink" title="路由发现"></a>路由发现</h4><p>RocketMQ的路由发现采用pull模型;NameServer不会主动推送Topic变动,而是client定时拉去topic最新路由;客户端默认每30s拉取一次最新路由</p><blockquote><p>拓展:</p><p>1)Push模型: 主动推送模型/发布-订阅模型</p><p>其需要维护一个长连接,<strong>实时性好</strong>,但<strong>资源消耗大</strong></p><p>​    适用场景:</p><ul><li>实时性要求高</li><li>Client数量不多,Server数据变化频繁</li></ul><p>2)Pull模型: 拉取模型</p><p>缺点:实时性较差,资源消耗较小</p><p>3)Long Polling模型: 长轮询模型</p><p>是对Push与Pull模型的融合,取长补短,对二者进行了折中</p></blockquote><h4 id="客户端NameServer选择策略"><a href="#客户端NameServer选择策略" class="headerlink" title="客户端NameServer选择策略"></a>客户端NameServer选择策略</h4><p>客户端在配置时必须要写上NameServer集群的地址，那么客户端到底连接的是哪个NameServer节点呢?</p><p>客户端首先会生产一个随机数，然后再与NameServer节点数量取模，此时得到的就是所要连接的节点索引，然后就会进行连接。如果连接失败，则会采用round-robin策略，逐个尝试着去连接其它节点。</p><p><u>首先采用<strong>随机策略</strong>进行选择,失败后采取<strong>轮询策略</strong></u></p><h3 id="4-Broker"><a href="#4-Broker" class="headerlink" title="4.Broker"></a>4.Broker</h3><h4 id="功能介绍-1"><a href="#功能介绍-1" class="headerlink" title="功能介绍"></a>功能介绍</h4><p>Broker充当消息中转角色,负责存储,转发消息;Broker在RocketMQ系统中负责接收并存储从生产者发来的消息,同时为消费者的拉取做准备(中介呗);Broker同时存储着消息相关的元数据,包括消费者组消费进度offset,主题,队列等</p><h4 id="模块构成"><a href="#模块构成" class="headerlink" title="模块构成"></a>模块构成</h4><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202309181430000.png" alt="image-20230918143047892"></p><p><strong>Remoting Module</strong>：整个Broker的实体，负责处理来自clients端的请求。而这个Broker实体则由以下模块构成。</p><p><strong>Client Manager</strong>：客户端管理器。负责接收、解析客户端(Producer/Consumer)请求，管理客户端。例如，维护Consumer的Topic订阅信息</p><p><strong>Store Service</strong>：存储服务。提供方便简单的API接口，处理消息存储到物理硬盘和消息查询功能。</p><p><strong>HA Service</strong>：高可用服务，提供Master Broker 和 Slave Broker之间的数据同步功能。</p><p><strong>Index Service</strong>：索引服务。根据特定的Message key，对投递到Broker的消息进行索引服务，同时也提供根据Message Key对消息进行快速查询的功能。</p><h4 id="集群部署"><a href="#集群部署" class="headerlink" title="集群部署"></a>集群部署</h4><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202309181440907.png" alt="image-20230918144029773"></p><p>为了增强Broker性能与吞吐量，Broker一般都是以集群形式出现的。各集群节点中可能存放着相同Topic的不同Queue。不过，这里有个问题，如果某Broker节点宕机，如何保证数据不丢失呢？其解决方案是，将每个Broker集群节点进行横向扩展，即将Broker节点再建为一个HA集群，解决单点问题。</p><p>Broker节点集群是一个主从集群，即集群中具有Master与Slave两种角色。Master负责处理读写操作请求，Slave负责对Master中的数据进行备份。当Master挂掉了，Slave则会自动切换为Master去工作。所以这个Broker集群是主备集群。一个Master可以包含多个Slave，但一个Slave只能隶属于一个Master。</p><p>Master与Slave 的对应关系是通过指定相同的BrokerName、不同的BrokerId 来确定的。BrokerId为0表示Master，非0表示Slave。每个Broker与NameServer集群中的所有节点建立长连接，定时注册Topic信息到所有NameServer。</p><h4 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h4><p>1）启动NameServer，NameServer启动后开始监听端口，等待Broker、Producer、Consumer连接。</p><p>2）启动Broker时，Broker会与所有的NameServer建立并保持长连接，然后每30秒向NameServer定时发送心跳包。</p><p>3）发送消息前，可以先创建Topic，创建Topic时需要指定该Topic要存储在哪些Broker上，当然，在创建Topic时也会将Topic与Broker的关系写入到NameServer中。不过，这步是可选的，也可以在发送消息时自动创建Topic。</p><blockquote><p>Topic的<strong>手动</strong>创建有两种方式:</p><ul><li>集群模式:该模式下创建的Topic在该集群中,所有Broker中Queue的数量是<strong>相同</strong>的</li><li>Broker模式:该模式下创建的Topic在该集群中,所有Broker中Queue的数量可以<strong>不同</strong></li></ul><p><strong>自动</strong>创建Topic时,默认采用Broker模式,会为每个Broker默认创建4个Queue</p></blockquote><p>4）Producer发送消息，启动时先跟NameServer集群中的其中一台建立长连接，并从NameServer中获取路由信息，即当前发送的Topic消息的Queue与Broker的地址（IP+Port）的映射关系。然后根据算法策略从队选择一个Queue，与队列所在的Broker建立长连接从而向Broker发消息。当然，在获取到路由信息后，Producer会首先将路由信息缓存到本地，再每30秒从NameServer更新一次路由信息。</p><p>5）Consumer跟Producer类似，跟其中一台NameServer建立长连接，获取其所订阅Topic的路由信息，然后根据算法策略从路由信息中获取到其所要消费的Queue，然后直接跟Broker建立长连接，开始消费其中的消息。Consumer在获取到路由信息后，同样也会每30秒从NameServer更新一次路由信息。不过不同于Producer的是，Consumer还会向Broker发送心跳，以确保Broker的存活状态。</p><p><strong>读/写队列</strong></p><p>从物理上来讲，读/写队列是同一个队列。所以，不存在读/写队列数据同步问题。读/写队列是逻辑上进行区分的概念。一般情况下，读/写队列数量是相同的。</p><p>例如，创建Topic时设置的写队列数量为8，读队列数量为4，此时系统会创建8个Queue，分别是0 1 2 3 4 5 6 7。Producer会将消息写入到这8个队列，但Consumer只会消费0 1 2 3这4个队列中的消息，4 5 6 7中的消息是不会被消费到的。</p><p>这样设计的目的是为了，方便Topic的Queue的缩容。</p><p>例如，原来创建的Topic中包含16个Queue，如何能够使其Queue缩容为8个，还不会丢失消息？可以动态修改写队列数量为8，读队列数量不变。此时新的消息只能写入到前8个队列，而消费都消费的却是16个队列中的数据。当发现后8个Queue中的消息消费完毕后，就可以再将读队列数量动态设置为8。整个缩容过程，没有丢失任何消息。</p><p>perm用于设置对当前创建Topic的操作权限：2表示只写，4表示只读，6表示读写</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 知识笔记 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> spirng-cloud </tag>
+            
+            <tag> RocketMQ </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Redis高级入门篇</title>
       <link href="/2023/09/16/2023-9-17-Redis%E9%AB%98%E7%BA%A7%E7%AF%87%E5%85%A5%E9%97%A8/"/>
       <url>/2023/09/16/2023-9-17-Redis%E9%AB%98%E7%BA%A7%E7%AF%87%E5%85%A5%E9%97%A8/</url>
@@ -17,6 +44,12 @@
           
       </categories>
       
+      
+        <tags>
+            
+            <tag> spirng-cloud </tag>
+            
+        </tags>
       
     </entry>
     
@@ -36,6 +69,12 @@
           
       </categories>
       
+      
+        <tags>
+            
+            <tag> spirng-cloud </tag>
+            
+        </tags>
       
     </entry>
     
@@ -365,25 +404,6 @@
     
     
     <entry>
-      <title>23/6/20 算法每日一题</title>
-      <link href="/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
-      <url>/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
-      
-        <content type="html"><![CDATA[<p>题目:<a href="https://ac.nowcoder.com/acm/contest/59284/E">幼稚园的树2</a></p><p>牛牛在幼稚园做义工，幼稚园中共有 n 棵树，第 1 天中午时它们的高度分别为：ℎ1,ℎ2,…,ℎn（单位：毫米）。</p><p>每一天的晚上第 i 棵树的高度会增加 ai毫米，而牛牛的任务则是在第二天的清晨检查每一棵树的高度，若某棵树的高度超过了 k 毫米牛牛就会将它的高度修剪为 b 毫米。</p><p>牛牛想请你帮它计算一下第 m 天中午每一棵树的高度。</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> N=<span class="number">1e5</span>+<span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">cut</span><span class="params">(<span class="type">int</span> h,<span class="type">int</span> ch,<span class="type">int</span> ach,<span class="type">int</span> gr,<span class="type">int</span> day)</span><span class="comment">//初始高度,要修剪的高度,修剪后高度,每天生长高度,天数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> cd1 = (ch-h)/gr+<span class="number">1</span>;<span class="comment">//第一轮到初始值需要的时间</span></span><br><span class="line">    <span class="keyword">if</span>(day&lt;cd1) <span class="keyword">return</span> h+gr*day;</span><br><span class="line">    <span class="keyword">else</span> day-=cd1,h=ach;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> cut_r = (ch-ach)/gr+<span class="number">1</span>;<span class="comment">//修剪后要生长的高度/每天生长高度 向上取整 =&gt; 每次修剪间隔的时间</span></span><br><span class="line">    <span class="keyword">return</span> ach+gr*(day%cut_r);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> t;</span><br><span class="line"><span class="type">int</span> n,m,k,b;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> tree[N];</span><br><span class="line"><span class="type">int</span> grow[N];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//cout&lt;&lt;cut(4,10,3,2,4);//初始高度为4,长到10后修建为3,每天长2,长4天</span></span><br><span class="line">    cin&gt;&gt;t;</span><br><span class="line">    <span class="keyword">while</span>(t--)</span><br><span class="line">    &#123;</span><br><span class="line">        cin&gt;&gt;n&gt;&gt;m&gt;&gt;k&gt;&gt;b;<span class="comment">//树数,第m天,长到k剪为b</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;tree[i]);</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;grow[i]);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) cout&lt;&lt;<span class="built_in">cut</span>(tree[i],k,b,grow[i],m<span class="number">-1</span>)&lt;&lt;<span class="string">&quot; &quot;</span>;</span><br><span class="line">        cout&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      
-      
-      <categories>
-          
-          <category> 算法学习 </category>
-          
-      </categories>
-      
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>23年大二下软件课设</title>
       <link href="/2023/06/20/2023-6-20-23%E8%BD%AF%E4%BB%B6%E8%AF%BE%E8%AE%BE/"/>
       <url>/2023/06/20/2023-6-20-23%E8%BD%AF%E4%BB%B6%E8%AF%BE%E8%AE%BE/</url>
@@ -394,6 +414,25 @@
       <categories>
           
           <category> 知识笔记 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>23/6/20 算法每日一题</title>
+      <link href="/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
+      <url>/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
+      
+        <content type="html"><![CDATA[<p>题目:<a href="https://ac.nowcoder.com/acm/contest/59284/E">幼稚园的树2</a></p><p>牛牛在幼稚园做义工，幼稚园中共有 n 棵树，第 1 天中午时它们的高度分别为：ℎ1,ℎ2,…,ℎn（单位：毫米）。</p><p>每一天的晚上第 i 棵树的高度会增加 ai毫米，而牛牛的任务则是在第二天的清晨检查每一棵树的高度，若某棵树的高度超过了 k 毫米牛牛就会将它的高度修剪为 b 毫米。</p><p>牛牛想请你帮它计算一下第 m 天中午每一棵树的高度。</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> N=<span class="number">1e5</span>+<span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">cut</span><span class="params">(<span class="type">int</span> h,<span class="type">int</span> ch,<span class="type">int</span> ach,<span class="type">int</span> gr,<span class="type">int</span> day)</span><span class="comment">//初始高度,要修剪的高度,修剪后高度,每天生长高度,天数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> cd1 = (ch-h)/gr+<span class="number">1</span>;<span class="comment">//第一轮到初始值需要的时间</span></span><br><span class="line">    <span class="keyword">if</span>(day&lt;cd1) <span class="keyword">return</span> h+gr*day;</span><br><span class="line">    <span class="keyword">else</span> day-=cd1,h=ach;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> cut_r = (ch-ach)/gr+<span class="number">1</span>;<span class="comment">//修剪后要生长的高度/每天生长高度 向上取整 =&gt; 每次修剪间隔的时间</span></span><br><span class="line">    <span class="keyword">return</span> ach+gr*(day%cut_r);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> t;</span><br><span class="line"><span class="type">int</span> n,m,k,b;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> tree[N];</span><br><span class="line"><span class="type">int</span> grow[N];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//cout&lt;&lt;cut(4,10,3,2,4);//初始高度为4,长到10后修建为3,每天长2,长4天</span></span><br><span class="line">    cin&gt;&gt;t;</span><br><span class="line">    <span class="keyword">while</span>(t--)</span><br><span class="line">    &#123;</span><br><span class="line">        cin&gt;&gt;n&gt;&gt;m&gt;&gt;k&gt;&gt;b;<span class="comment">//树数,第m天,长到k剪为b</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;tree[i]);</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;grow[i]);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) cout&lt;&lt;<span class="built_in">cut</span>(tree[i],k,b,grow[i],m<span class="number">-1</span>)&lt;&lt;<span class="string">&quot; &quot;</span>;</span><br><span class="line">        cout&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法学习 </category>
           
       </categories>
       
@@ -670,25 +709,6 @@
     
     
     <entry>
-      <title>知识笔记测试</title>
-      <link href="/2023/01/19/2023-1-19-%E7%9F%A5%E8%AF%86%E7%AC%94%E8%AE%B0/"/>
-      <url>/2023/01/19/2023-1-19-%E7%9F%A5%E8%AF%86%E7%AC%94%E8%AE%B0/</url>
-      
-        <content type="html"><![CDATA[<h2 id="这是第一篇知识笔记"><a href="#这是第一篇知识笔记" class="headerlink" title="这是第一篇知识笔记"></a>这是第一篇知识笔记</h2><ol><li>带 <u>下划线</u> 的文本</li><li>带 <emp>着重号</emp> 的文本</li><li>带 <wavy>波浪线</wavy> 的文本</li><li>带 <del>删除线</del> 的文本</li><li>键盘样式的文本 <kbd>command</kbd> + <kbd>D</kbd></li><li>密码样式的文本：<psw>这里没有验证码</psw></li></ol>]]></content>
-      
-      
-      <categories>
-          
-          <category> 知识笔记 </category>
-          
-      </categories>
-      
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>算法学习测试</title>
       <link href="/2023/01/19/2023-1-19-%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0/"/>
       <url>/2023/01/19/2023-1-19-%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0/</url>
@@ -699,6 +719,25 @@
       <categories>
           
           <category> 算法学习 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>知识笔记测试</title>
+      <link href="/2023/01/19/2023-1-19-%E7%9F%A5%E8%AF%86%E7%AC%94%E8%AE%B0/"/>
+      <url>/2023/01/19/2023-1-19-%E7%9F%A5%E8%AF%86%E7%AC%94%E8%AE%B0/</url>
+      
+        <content type="html"><![CDATA[<h2 id="这是第一篇知识笔记"><a href="#这是第一篇知识笔记" class="headerlink" title="这是第一篇知识笔记"></a>这是第一篇知识笔记</h2><ol><li>带 <u>下划线</u> 的文本</li><li>带 <emp>着重号</emp> 的文本</li><li>带 <wavy>波浪线</wavy> 的文本</li><li>带 <del>删除线</del> 的文本</li><li>键盘样式的文本 <kbd>command</kbd> + <kbd>D</kbd></li><li>密码样式的文本：<psw>这里没有验证码</psw></li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> 知识笔记 </category>
           
       </categories>
       
