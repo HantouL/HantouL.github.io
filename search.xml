@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>java基础刷题笔记3</title>
+      <link href="/2023/10/08/2023-10-8-java%E5%88%B7%E9%A2%98%E7%AC%94%E8%AE%B03/"/>
+      <url>/2023/10/08/2023-10-8-java%E5%88%B7%E9%A2%98%E7%AC%94%E8%AE%B03/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Java刷题笔记3"><a href="#Java刷题笔记3" class="headerlink" title="Java刷题笔记3"></a>Java刷题笔记3</h1><h2 id="T1-子类与父类实例化时的执行顺序"><a href="#T1-子类与父类实例化时的执行顺序" class="headerlink" title="T1 子类与父类实例化时的执行顺序"></a>T1 子类与父类实例化时的执行顺序</h2><h3 id="执行顺序"><a href="#执行顺序" class="headerlink" title="执行顺序:"></a>执行顺序:</h3><p><strong>父类静态代码块 -&gt;子类静态代码块 -&gt;父类非静态代码块 -&gt; 父类构造函数 -&gt; 子类非静态代码块 -&gt; 子类构造函数。 </strong> </p><p>  案例代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Father</span> &#123;</span><br><span class="line">    <span class="keyword">static</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;父类静态代码块&quot;</span>);</span><br><span class="line">    &#125;    </span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;父类非静态代码块&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Father</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;父类构造函数&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Son</span> <span class="keyword">extends</span> <span class="title class_">Father</span>&#123;</span><br><span class="line">    <span class="keyword">static</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;子类静态代码块&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;子类非静态代码块&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Son</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;子类构造函数&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Son</span> <span class="variable">son</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Son</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>结果为：  父类静态代码块<br>                子类静态代码块<br>                父类非静态代码块<br>                父类构造函数<br>                子类非静态代码块<br>                子类构造函数 </p><h2 id="T2-内部类"><a href="#T2-内部类" class="headerlink" title="T2 内部类"></a>T2 内部类</h2><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310081949311.png" alt="image-20231008194910228"></p><blockquote><p><strong>知识总结:</strong><br> 1.静态内部类才可以声明静态方法 </p><p> 2.静态方法不可以使用非静态变量 </p><p> 3.抽象方法不可以有函数体</p></blockquote><h2 id="T3-静态方法的调用"><a href="#T3-静态方法的调用" class="headerlink" title="T3 静态方法的调用"></a>T3 静态方法的调用</h2><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310081957898.png" alt="image-20231008195709851"></p><blockquote><p>在java中静态方法中不能使用非静态方法和非静态变量。但非静态方法中可以使用静态变量</p><p><strong>在本题中,<u>main方法</u>显然是静态方法</strong></p></blockquote><h2 id="T4-开发中使用泛型的作用"><a href="#T4-开发中使用泛型的作用" class="headerlink" title="T4 开发中使用泛型的作用"></a>T4 开发中使用泛型的作用</h2><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310082032108.png" alt="image-20231008203227076"></p><blockquote><p>泛型仅仅是java的语法糖，它不会影响java虚拟机生成的汇编代码，在编译阶段，虚拟机就会把泛型的类型擦除，还原成没有泛型的代码，顶多编译速度稍微慢一些，执行速度是完全没有什么区别的</p></blockquote><h2 id="T5-Java多态调用"><a href="#T5-Java多态调用" class="headerlink" title="T5 Java多态调用"></a>T5 Java多态调用</h2><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310082033092.png" alt="image-20231008203334063"></p><blockquote><p>java多态有两种情况：<strong>重载</strong>和<strong>覆写</strong> 在覆写中，运用的是动态单分配，是根据new的类型确定对象，从而确定调用的方法； 在重载中，运用的是静态多分派，即根据静态类型确定对象，因此不是根据new的类型确定调用的方法</p></blockquote><h2 id="T6-接口中成员变量的默认等价类型"><a href="#T6-接口中成员变量的默认等价类型" class="headerlink" title="T6 接口中成员变量的默认等价类型"></a>T6 接口中成员变量的默认等价类型</h2><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310082038902.png" alt="image-20231008203801866"></p><blockquote><p>接口中的变量默认是public static final 的，方法默认是public abstract 的 </p></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 知识笔记 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> javaSE刷题 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>java基础刷题笔记2</title>
       <link href="/2023/10/07/2023-10-7-java%E5%88%B7%E9%A2%98%E7%AC%94%E8%AE%B02/"/>
       <url>/2023/10/07/2023-10-7-java%E5%88%B7%E9%A2%98%E7%AC%94%E8%AE%B02/</url>
