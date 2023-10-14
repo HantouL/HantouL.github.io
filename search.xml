@@ -4,6 +4,81 @@
   
     
     <entry>
+      <title>MIT 6046 L3 快速傅里叶变换 学习笔记</title>
+      <link href="/2023/10/14/2023-10-14-MIT6-046%E7%AE%97%E6%B3%95%E8%AE%BE%E8%AE%A1-L3-%E5%BF%AB%E9%80%9F%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+      <url>/2023/10/14/2023-10-14-MIT6-046%E7%AE%97%E6%B3%95%E8%AE%BE%E8%AE%A1-L3-%E5%BF%AB%E9%80%9F%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+      
+        <content type="html"><![CDATA[<h1 id="MIT6-046算法设计-L3-快速傅里叶变换-分治思想-学习笔记"><a href="#MIT6-046算法设计-L3-快速傅里叶变换-分治思想-学习笔记" class="headerlink" title="MIT6.046算法设计 L3 快速傅里叶变换(分治思想) 学习笔记"></a>MIT6.046算法设计 L3 快速傅里叶变换(分治思想) 学习笔记</h1>]]></content>
+      
+      
+      <categories>
+          
+          <category> 知识笔记 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 算法学习 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>MIT 6046 R1 矩阵乘法与主定理 学习笔记</title>
+      <link href="/2023/10/14/2023-10-14-MIT6-046-R1-%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95%E4%B8%8E%E4%B8%BB%E5%AE%9A%E7%90%86-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+      <url>/2023/10/14/2023-10-14-MIT6-046-R1-%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95%E4%B8%8E%E4%B8%BB%E5%AE%9A%E7%90%86-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+      
+        <content type="html"><![CDATA[<h1 id="MIT6-046算法设计-R1-矩阵乘法与主定理-学习笔记"><a href="#MIT6-046算法设计-R1-矩阵乘法与主定理-学习笔记" class="headerlink" title="MIT6.046算法设计 R1 矩阵乘法与主定理 学习笔记"></a>MIT6.046算法设计 R1 矩阵乘法与主定理 学习笔记</h1><h2 id="带权区间调度"><a href="#带权区间调度" class="headerlink" title="带权区间调度"></a>带权区间调度</h2><p>在L1中我们学习了区间调度</p><h3 id="现在对每个任务加权-要如何处理得到最大和"><a href="#现在对每个任务加权-要如何处理得到最大和" class="headerlink" title="现在对每个任务加权,要如何处理得到最大和?"></a>现在对每个任务加权,要如何处理得到最大和?</h3><p>假设每一个任务都是潜在的第一个被执行的任务,将这个任务设为任务j,则得到他的权重w[j]; </p><p>对于j后面的任务,我们也进行同样的尝试,定义Rj为{ i | s(i) &gt; f(j)},解释一下,Rj是请求的集合,其中他们的完成时间晚于第j个请求的停止时间</p><p>我们称原来的问题为WIS(1,2,….n),则可以将其拆分为若干子问题</p><blockquote><p>WIS: Weighted Interval Scheduling 带权区间调度</p></blockquote><p>最终不断地解决子问题,最后得到答案为 max(j&lt;=j&lt;=n){w[j]+WIS(R[j])}, <strong>时间复杂度为n^2</strong></p><h3 id="Can-we-do-better"><a href="#Can-we-do-better" class="headerlink" title="Can  we do better?"></a>Can  we do better?</h3><h4 id="哪里拖慢了效率"><a href="#哪里拖慢了效率" class="headerlink" title="哪里拖慢了效率?"></a>哪里拖慢了效率?</h4><p>上面的方法对所有的子问题都进行了尝试,包括那些明显不满足条件的</p><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141154450.png" alt="image-20231014114846004"></p><blockquote><p>具体来说,当我们尝试了请求2作为开始的请求后,对于以请求3开始的子问题,其实是请求2作为开头的请求的子问题,就是 以请求3开头的结果的权重和 等于 以2开头的权重和 减去 请求2的权重</p><p>而上面的算法又从头对以2开头的子问题 的 子问题进行了一次计算,造成了重复计算, 明明只需要减去2的权重就完事了,不是吗</p></blockquote><h4 id="Let’s-do-this"><a href="#Let’s-do-this" class="headerlink" title="Let’s do this"></a>Let’s do this</h4><p>对上面的算法进行改造,根据分析,显然不应该尝试所有可能的请求</p><h5 id="问题来了-如何找到适合作为开头的请求"><a href="#问题来了-如何找到适合作为开头的请求" class="headerlink" title="问题来了,如何找到适合作为开头的请求?"></a>问题来了,如何找到适合作为开头的请求?</h5><p>对于上面图中的例子,显然只选择1,2是更好的</p><p>将请求按照开始时间进行排序,我们应该首先考虑开始时间较早的请求</p><p><strong>考虑一个问题: 如何取舍请求1呢</strong></p><p>WIS(1,2…,n)= max{WIS(2,…,n)+w[1],WIS(R1)}</p><blockquote><p>解释: 在考虑请求1的权值和 与 在请求1结束后开始的所有可能结果进行比较</p></blockquote><p>递归树图</p><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141205193.png" alt="image-20231014120541132"></p><h5 id="开始解决问题"><a href="#开始解决问题" class="headerlink" title="开始解决问题"></a>开始解决问题</h5><ol><li>对所有请求,按照开始时间进行递增排序 O(nlogn)</li><li>参考上图的递归树,进行自底向上递归 O(n)</li></ol><p><strong>复杂度为O(nlogn)</strong></p><h5 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h5><p>改进后的算法,对于每个子问题,只需要进行一次max计算(因为子问题已经在自底向上的过程中被算过了,只需要加一次当前判断的权; )</p><p>而对于改进前的的算法,每一层向上递归都会增加一个可能性,而且需要进行重复计算,所以他的层数是1+2+3+…+n,复杂度为O(n^2)</p><h2 id="矩阵乘法中的Strassen算法"><a href="#矩阵乘法中的Strassen算法" class="headerlink" title="矩阵乘法中的Strassen算法"></a>矩阵乘法中的Strassen算法</h2><h3 id="矩阵乘法-很复杂吧"><a href="#矩阵乘法-很复杂吧" class="headerlink" title="矩阵乘法, 很复杂吧?"></a>矩阵乘法, 很复杂吧?</h3><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141219090.webp" alt="img"></p><p>显然,这个朴素的算矩阵乘法的时间复杂度为O(n^3)</p><h3 id="我超-Strassen"><a href="#我超-Strassen" class="headerlink" title="我超,Strassen!"></a>我超,Strassen!</h3><p>没想到吧,存在小于O(n^3)的算法</p><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141226168.png" alt="image-20231014122607096"></p><p>得到递推公式</p><p><strong>T(n) = 8*T(n/2) + O((n/2)^2)</strong>      (8次矩阵乘法,4次矩阵加法 + 矩阵合并)</p><h3 id="Strassen实现步骤"><a href="#Strassen实现步骤" class="headerlink" title="Strassen实现步骤"></a>Strassen实现步骤</h3><ol><li>按上述方法将ABC分解 O(n)</li><li><p>创建如下矩阵 O(n^2)<br><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141240561.png" alt="image-20231014124011533"></p></li><li><p>递归计算如下7个矩阵<br><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141240670.png" alt="image-20231014124034863"></p></li><li><p>通过P计算C   O(n^2)<br><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141241322.png" alt="image-20231014124115289"></p></li></ol><blockquote><p>以上步骤来自:<br>详解矩阵乘法中的Strassen算法 - Coder LL的文章 - 知乎 <a href="https://zhuanlan.zhihu.com/p/78657463">https://zhuanlan.zhihu.com/p/78657463</a></p></blockquote><h2 id="Master-Theorem-主定理"><a href="#Master-Theorem-主定理" class="headerlink" title="Master Theorem 主定理"></a>Master Theorem 主定理</h2><h3 id="主定理是用来"><a href="#主定理是用来" class="headerlink" title="主定理是用来"></a>主定理是用来</h3><p>求解递如下归算法的时间复杂度..</p><p>T(n) = aT(n/b) + f(n)</p><p>有三种情况</p><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141303640.jpeg" alt="img"></p><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141303888.png" alt="image-20231014130322858"></p><blockquote><p>参考:<br>主定理(Master Theorem) - John Liu的文章 - 知乎 <a href="https://zhuanlan.zhihu.com/p/113406812">https://zhuanlan.zhihu.com/p/113406812</a></p></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 知识笔记 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 算法学习 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>java基础刷题笔记8</title>
+      <link href="/2023/10/13/2023-10-13-java%E5%88%B7%E9%A2%98%E7%AC%94%E8%AE%B08/"/>
+      <url>/2023/10/13/2023-10-13-java%E5%88%B7%E9%A2%98%E7%AC%94%E8%AE%B08/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Java刷题笔记8"><a href="#Java刷题笔记8" class="headerlink" title="Java刷题笔记8"></a>Java刷题笔记8</h1><h2 id="T1-父类子类的调用"><a href="#T1-父类子类的调用" class="headerlink" title="T1 父类子类的调用"></a>T1 父类子类的调用</h2><p>假定Base b = new Derived（）; 调用执行b.methodOne（）后，输出结果是什么？</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Base</span></span><br><span class="line">&#123;</span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">methodOne</span><span class="params">()</span></span><br><span class="line">   &#123;</span><br><span class="line">      System.out.print(<span class="string">&quot;A&quot;</span>);</span><br><span class="line">      methodTwo();</span><br><span class="line">   &#125;</span><br><span class="line"> </span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">methodTwo</span><span class="params">()</span></span><br><span class="line">   &#123;</span><br><span class="line">      System.out.print(<span class="string">&quot;B&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Derived</span> <span class="keyword">extends</span> <span class="title class_">Base</span></span><br><span class="line">&#123;</span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">methodOne</span><span class="params">()</span></span><br><span class="line">   &#123;</span><br><span class="line">      <span class="built_in">super</span>.methodOne();</span><br><span class="line">      System.out.print(<span class="string">&quot;C&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line"> </span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">methodTwo</span><span class="params">()</span></span><br><span class="line">   &#123;</span><br><span class="line">      <span class="built_in">super</span>.methodTwo();</span><br><span class="line">      System.out.print(<span class="string">&quot;D&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>答案: ABDC</p><blockquote><p>只要是被子类重写的方法，不被super调用都是调用子类方法</p><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141009980.jpeg" alt="img"></p></blockquote><h2 id="T2-Hashtable-和-HashMap-的区别"><a href="#T2-Hashtable-和-HashMap-的区别" class="headerlink" title="T2 Hashtable 和 HashMap 的区别"></a>T2 Hashtable 和 HashMap 的区别</h2><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141016305.png" alt="image-20231014101636256"></p><blockquote><p>HashTable和HashMap的区别（7点）： </p><p>  1.<strong>继承的父类不同</strong>：HashTable继承Dictory类，HashMap继承AbstractMap.但都实现了Map接口； </p><p>  2.<strong>线程安全性不同</strong>：HashTable是线程安全的,适用于多线程；HashMap是非线程安全，更适合于单线程； </p><p>  3.是否提供<strong>contains方法</strong>：HashTable中保留了contains方法，与constainsValue功能相同；HashMap中去掉了contains方法； </p><p>  4.<strong>key和value是否可为null值</strong>：HashTable的key、value都不允许null值；HashMap，null可以作为key； </p><p>  5.<strong>遍历方式的内部实现不同</strong>：HashTable、HashMap都使用了Iterator，HashTable还使用过Enumeration方式；</p><p>  6.<strong>hash值不同</strong>：HashTable直接使用对象的hashCode，而HashMap重新计算hash值。 </p><p>  7.内部使用的<strong>数组初始化和扩容方式不同</strong>：Hashtable不要求底层数组的容量一定要为2的整数次幂，而HashMap则要求一定为2的整数次幂；Hashtable扩容时，将容量变为原来的2倍加1，而HashMap扩容时，将容量变为原来的2倍。</p><p>作者：98年饭崽<br>链接：<a href="https://www.nowcoder.com/exam/test/74968216/submission?pid=53634742&amp;testCallback=undefined">https://www.nowcoder.com/exam/test/74968216/submission?pid=53634742&amp;testCallback=undefined</a><br>来源：牛客网</p></blockquote><h2 id="T3-静态方法"><a href="#T3-静态方法" class="headerlink" title="T3 静态方法"></a>T3 静态方法</h2><p>阅读如下代码。 请问，对语句行 test.hello(). 描述正确的有（）</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> NowCoder;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">hello</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyApplication</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">        Test test=<span class="literal">null</span>;</span><br><span class="line">        test.hello();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>A 能编译通过，并正确运行</p><p>B因为使用了未初始化的变量，所以不能编译通过</p><p>C 以错误的方式访问了静态方法</p><p>D 能编译通过，但因变量为null，不能正常运行</p><p>答案: A</p><blockquote><p>静态方法的使用不依靠对象，只看类型，在编译时就确定了</p></blockquote><p>　</p><h2 id="T4-构造方法的调用时机"><a href="#T4-构造方法的调用时机" class="headerlink" title="T4 构造方法的调用时机"></a>T4 构造方法的调用时机</h2><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310141104493.png" alt="image-20231014110410450"></p><blockquote><p>readObject方法只是从文件中还原对象，clone只是一种复制拷贝对象。</p><p>构造函数的作用是完成对象的初始化。当程序执行到new操作符时， 首先去看new操作符后面的类型，因为知道了类型，才能知道要分配多大的内存空间。分配完内存之后，再调用构造函数，填充对象的各个域，这一步叫做对象的初始化。而选项B、D中，对象的初始化并不是通过构造函数完成的，而是读取别的内存区域中的对象的各个域来完成。</p><p>作者：joso<br>链接：<a href="https://www.nowcoder.com/exam/test/74971287/submission?pid=53636911&amp;testCallback=undefined">https://www.nowcoder.com/exam/test/74971287/submission?pid=53636911&amp;testCallback=undefined</a><br>来源：牛客网</p></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 知识笔记 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> javaSE刷题 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>java基础刷题笔记7</title>
       <link href="/2023/10/12/2023-10-12-java%E5%88%B7%E9%A2%98%E7%AC%94%E8%AE%B07/"/>
       <url>/2023/10/12/2023-10-12-java%E5%88%B7%E9%A2%98%E7%AC%94%E8%AE%B07/</url>
@@ -798,25 +873,6 @@
     
     
     <entry>
-      <title>23/6/20 算法每日一题</title>
-      <link href="/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
-      <url>/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
-      
-        <content type="html"><![CDATA[<p>题目:<a href="https://ac.nowcoder.com/acm/contest/59284/E">幼稚园的树2</a></p><p>牛牛在幼稚园做义工，幼稚园中共有 n 棵树，第 1 天中午时它们的高度分别为：ℎ1,ℎ2,…,ℎn（单位：毫米）。</p><p>每一天的晚上第 i 棵树的高度会增加 ai毫米，而牛牛的任务则是在第二天的清晨检查每一棵树的高度，若某棵树的高度超过了 k 毫米牛牛就会将它的高度修剪为 b 毫米。</p><p>牛牛想请你帮它计算一下第 m 天中午每一棵树的高度。</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> N=<span class="number">1e5</span>+<span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">cut</span><span class="params">(<span class="type">int</span> h,<span class="type">int</span> ch,<span class="type">int</span> ach,<span class="type">int</span> gr,<span class="type">int</span> day)</span><span class="comment">//初始高度,要修剪的高度,修剪后高度,每天生长高度,天数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> cd1 = (ch-h)/gr+<span class="number">1</span>;<span class="comment">//第一轮到初始值需要的时间</span></span><br><span class="line">    <span class="keyword">if</span>(day&lt;cd1) <span class="keyword">return</span> h+gr*day;</span><br><span class="line">    <span class="keyword">else</span> day-=cd1,h=ach;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> cut_r = (ch-ach)/gr+<span class="number">1</span>;<span class="comment">//修剪后要生长的高度/每天生长高度 向上取整 =&gt; 每次修剪间隔的时间</span></span><br><span class="line">    <span class="keyword">return</span> ach+gr*(day%cut_r);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> t;</span><br><span class="line"><span class="type">int</span> n,m,k,b;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> tree[N];</span><br><span class="line"><span class="type">int</span> grow[N];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//cout&lt;&lt;cut(4,10,3,2,4);//初始高度为4,长到10后修建为3,每天长2,长4天</span></span><br><span class="line">    cin&gt;&gt;t;</span><br><span class="line">    <span class="keyword">while</span>(t--)</span><br><span class="line">    &#123;</span><br><span class="line">        cin&gt;&gt;n&gt;&gt;m&gt;&gt;k&gt;&gt;b;<span class="comment">//树数,第m天,长到k剪为b</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;tree[i]);</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;grow[i]);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) cout&lt;&lt;<span class="built_in">cut</span>(tree[i],k,b,grow[i],m<span class="number">-1</span>)&lt;&lt;<span class="string">&quot; &quot;</span>;</span><br><span class="line">        cout&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      
-      
-      <categories>
-          
-          <category> 算法学习 </category>
-          
-      </categories>
-      
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>23年大二下软件课设</title>
       <link href="/2023/06/20/2023-6-20-23%E8%BD%AF%E4%BB%B6%E8%AF%BE%E8%AE%BE/"/>
       <url>/2023/06/20/2023-6-20-23%E8%BD%AF%E4%BB%B6%E8%AF%BE%E8%AE%BE/</url>
@@ -827,6 +883,25 @@
       <categories>
           
           <category> 知识笔记 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>23/6/20 算法每日一题</title>
+      <link href="/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
+      <url>/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
+      
+        <content type="html"><![CDATA[<p>题目:<a href="https://ac.nowcoder.com/acm/contest/59284/E">幼稚园的树2</a></p><p>牛牛在幼稚园做义工，幼稚园中共有 n 棵树，第 1 天中午时它们的高度分别为：ℎ1,ℎ2,…,ℎn（单位：毫米）。</p><p>每一天的晚上第 i 棵树的高度会增加 ai毫米，而牛牛的任务则是在第二天的清晨检查每一棵树的高度，若某棵树的高度超过了 k 毫米牛牛就会将它的高度修剪为 b 毫米。</p><p>牛牛想请你帮它计算一下第 m 天中午每一棵树的高度。</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> N=<span class="number">1e5</span>+<span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">cut</span><span class="params">(<span class="type">int</span> h,<span class="type">int</span> ch,<span class="type">int</span> ach,<span class="type">int</span> gr,<span class="type">int</span> day)</span><span class="comment">//初始高度,要修剪的高度,修剪后高度,每天生长高度,天数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> cd1 = (ch-h)/gr+<span class="number">1</span>;<span class="comment">//第一轮到初始值需要的时间</span></span><br><span class="line">    <span class="keyword">if</span>(day&lt;cd1) <span class="keyword">return</span> h+gr*day;</span><br><span class="line">    <span class="keyword">else</span> day-=cd1,h=ach;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> cut_r = (ch-ach)/gr+<span class="number">1</span>;<span class="comment">//修剪后要生长的高度/每天生长高度 向上取整 =&gt; 每次修剪间隔的时间</span></span><br><span class="line">    <span class="keyword">return</span> ach+gr*(day%cut_r);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> t;</span><br><span class="line"><span class="type">int</span> n,m,k,b;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> tree[N];</span><br><span class="line"><span class="type">int</span> grow[N];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//cout&lt;&lt;cut(4,10,3,2,4);//初始高度为4,长到10后修建为3,每天长2,长4天</span></span><br><span class="line">    cin&gt;&gt;t;</span><br><span class="line">    <span class="keyword">while</span>(t--)</span><br><span class="line">    &#123;</span><br><span class="line">        cin&gt;&gt;n&gt;&gt;m&gt;&gt;k&gt;&gt;b;<span class="comment">//树数,第m天,长到k剪为b</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;tree[i]);</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;grow[i]);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) cout&lt;&lt;<span class="built_in">cut</span>(tree[i],k,b,grow[i],m<span class="number">-1</span>)&lt;&lt;<span class="string">&quot; &quot;</span>;</span><br><span class="line">        cout&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法学习 </category>
           
       </categories>
       
