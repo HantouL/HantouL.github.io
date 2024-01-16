@@ -1231,6 +1231,31 @@
     
     
     <entry>
+      <title>(项目)23年大二下软件课设</title>
+      <link href="/2023/06/20/2023-6-20-%E9%A1%B9%E7%9B%AE-23%E8%BD%AF%E4%BB%B6%E8%AF%BE%E8%AE%BE/"/>
+      <url>/2023/06/20/2023-6-20-%E9%A1%B9%E7%9B%AE-23%E8%BD%AF%E4%BB%B6%E8%AF%BE%E8%AE%BE/</url>
+      
+        <content type="html"><![CDATA[<h1 id="WHSubway-武汉市地铁导引系统"><a href="#WHSubway-武汉市地铁导引系统" class="headerlink" title="WHSubway 武汉市地铁导引系统"></a>WHSubway 武汉市地铁导引系统</h1><p>本系统前端基于<a href="https://blog.csdn.net/qq_42365534/article/details/129887911?spm=1001.2014.3001.5502">electron-vue3+vite</a>脚手架搭建,实现了<del>简陋</del>基础的GUI功能<br>后端用了SpringBoot,mybatis等技术<br>武汉市地铁线路截取日期为2023.5.23日</p><p><strong><em>由于electron的文件太大了,传不到github上,就用夸克网盘吧</em></strong></p><p>夸克网盘地址:<a href="https://pan.quark.cn/s/c24eb516f6c2">WHSubway 武汉市地铁引导系统</a></p><h3 id="以下是实验报告中截取的废话"><a href="#以下是实验报告中截取的废话" class="headerlink" title="以下是实验报告中截取的废话"></a><del>以下是实验报告中截取的废话</del></h3><h2 id="项目背景"><a href="#项目背景" class="headerlink" title="项目背景"></a>项目背景</h2><p>随着城市的快速发展，武汉市地铁系统不断扩建，已成为市民出行的重要交通方式之一。然而由于线路复杂、站点众多，乘客常常面临选择路线困难的问题。因此，如何高效地引导乘客选择最合适的路线已是一个具有挑战性的问题。<br>为了解决这个问题，武汉市地铁导引系统应运而生。该系统可以让乘客输入起始站点和目的站点，自动计算最短路线，并在路线信息中提供换乘方案，以便乘客提前规划出行路线。这不仅可以缓解乘客选择路线的困难，还能减少拥挤，优化地铁运营效率。<br>武汉市地铁导引系统使用了最新的技术，基于Electron-Vite-Vue框架实现了图形化界面，使用户操作更加友好和方便。同时，前后端分离的设计，采用MyBatis和MySQL数据库进行数据管理，采用SpringBoot的后端框架，使得系统更加易于更新和维护，也增强了系统的可靠性和稳定性。<br>武汉市地铁导引系统基于2023.5.27的武汉地铁线路，但随着地铁线路不断扩建和更新，该系统也可以通过修改后端的数据库不断完善和更新，以满足不同时间段、不同线路的乘客需求。武汉市地铁导引系统将为城市居民提供了更加便捷、快速、准确的出行选择。</p><h2 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h2><h4 id="图形化界面"><a href="#图形化界面" class="headerlink" title="图形化界面"></a>图形化界面</h4><p>为了便于乘客使用，需要设计一个简单的图形化界面，让用户能直观的了解系统的使用方法和用途。GUI中要对用户的操作进行引导，例如选择站点的下拉菜单选项比较多，所以设计用户能直接在选项栏中进行输入以进行模糊搜索，同时需要对用户的操作进行初步的判断与纠错，以减轻后端的负担，例如，用户未输入站点就点击提交时，提示用户输入站点，而不是直接把数据提交给后端处理查询。</p><h4 id="获取最短路径"><a href="#获取最短路径" class="headerlink" title="获取最短路径"></a>获取最短路径</h4><p>获取最短路径是本系统的核心算法，为了实现最短路径的查询，使用广度优先搜索BFS算法，这样可以较快的找到经过站点最少的地铁线路。</p><h4 id="换乘判断"><a href="#换乘判断" class="headerlink" title="换乘判断"></a>换乘判断</h4><p>为了方便用户进行路线的规划，本系统需要展示换乘站点，为了实现换乘站点的查询，需要进行换乘判断，并输出将要换乘的线路。</p><h4 id="缩略地图放大"><a href="#缩略地图放大" class="headerlink" title="缩略地图放大"></a>缩略地图放大</h4><p>为了让用户在查询查询前能找到想去的站点，差查询后能对查找到的线路进行概览，需要将界面上缩略地图进行局部的放大，以便于用户方便的查看大地图。</p><p><img src="https://img-blog.csdnimg.cn/ef1f6e21aa5c43baa3ed2a09c400de29.png" alt="欢迎界面"><br><img src="https://img-blog.csdnimg.cn/ecab171b5417476db0ee3cff54b72582.jpeg" alt="线路查找示意"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 知识笔记 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 项目 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>(项目)23年大二下硬件课设</title>
       <link href="/2023/06/20/2023-6-20-%E9%A1%B9%E7%9B%AE-23%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/"/>
       <url>/2023/06/20/2023-6-20-%E9%A1%B9%E7%9B%AE-23%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/</url>
@@ -1269,31 +1294,6 @@
           
       </categories>
       
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>(项目)23年大二下软件课设</title>
-      <link href="/2023/06/20/2023-6-20-%E9%A1%B9%E7%9B%AE-23%E8%BD%AF%E4%BB%B6%E8%AF%BE%E8%AE%BE/"/>
-      <url>/2023/06/20/2023-6-20-%E9%A1%B9%E7%9B%AE-23%E8%BD%AF%E4%BB%B6%E8%AF%BE%E8%AE%BE/</url>
-      
-        <content type="html"><![CDATA[<h1 id="WHSubway-武汉市地铁导引系统"><a href="#WHSubway-武汉市地铁导引系统" class="headerlink" title="WHSubway 武汉市地铁导引系统"></a>WHSubway 武汉市地铁导引系统</h1><p>本系统前端基于<a href="https://blog.csdn.net/qq_42365534/article/details/129887911?spm=1001.2014.3001.5502">electron-vue3+vite</a>脚手架搭建,实现了<del>简陋</del>基础的GUI功能<br>后端用了SpringBoot,mybatis等技术<br>武汉市地铁线路截取日期为2023.5.23日</p><p><strong><em>由于electron的文件太大了,传不到github上,就用夸克网盘吧</em></strong></p><p>夸克网盘地址:<a href="https://pan.quark.cn/s/c24eb516f6c2">WHSubway 武汉市地铁引导系统</a></p><h3 id="以下是实验报告中截取的废话"><a href="#以下是实验报告中截取的废话" class="headerlink" title="以下是实验报告中截取的废话"></a><del>以下是实验报告中截取的废话</del></h3><h2 id="项目背景"><a href="#项目背景" class="headerlink" title="项目背景"></a>项目背景</h2><p>随着城市的快速发展，武汉市地铁系统不断扩建，已成为市民出行的重要交通方式之一。然而由于线路复杂、站点众多，乘客常常面临选择路线困难的问题。因此，如何高效地引导乘客选择最合适的路线已是一个具有挑战性的问题。<br>为了解决这个问题，武汉市地铁导引系统应运而生。该系统可以让乘客输入起始站点和目的站点，自动计算最短路线，并在路线信息中提供换乘方案，以便乘客提前规划出行路线。这不仅可以缓解乘客选择路线的困难，还能减少拥挤，优化地铁运营效率。<br>武汉市地铁导引系统使用了最新的技术，基于Electron-Vite-Vue框架实现了图形化界面，使用户操作更加友好和方便。同时，前后端分离的设计，采用MyBatis和MySQL数据库进行数据管理，采用SpringBoot的后端框架，使得系统更加易于更新和维护，也增强了系统的可靠性和稳定性。<br>武汉市地铁导引系统基于2023.5.27的武汉地铁线路，但随着地铁线路不断扩建和更新，该系统也可以通过修改后端的数据库不断完善和更新，以满足不同时间段、不同线路的乘客需求。武汉市地铁导引系统将为城市居民提供了更加便捷、快速、准确的出行选择。</p><h2 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h2><h4 id="图形化界面"><a href="#图形化界面" class="headerlink" title="图形化界面"></a>图形化界面</h4><p>为了便于乘客使用，需要设计一个简单的图形化界面，让用户能直观的了解系统的使用方法和用途。GUI中要对用户的操作进行引导，例如选择站点的下拉菜单选项比较多，所以设计用户能直接在选项栏中进行输入以进行模糊搜索，同时需要对用户的操作进行初步的判断与纠错，以减轻后端的负担，例如，用户未输入站点就点击提交时，提示用户输入站点，而不是直接把数据提交给后端处理查询。</p><h4 id="获取最短路径"><a href="#获取最短路径" class="headerlink" title="获取最短路径"></a>获取最短路径</h4><p>获取最短路径是本系统的核心算法，为了实现最短路径的查询，使用广度优先搜索BFS算法，这样可以较快的找到经过站点最少的地铁线路。</p><h4 id="换乘判断"><a href="#换乘判断" class="headerlink" title="换乘判断"></a>换乘判断</h4><p>为了方便用户进行路线的规划，本系统需要展示换乘站点，为了实现换乘站点的查询，需要进行换乘判断，并输出将要换乘的线路。</p><h4 id="缩略地图放大"><a href="#缩略地图放大" class="headerlink" title="缩略地图放大"></a>缩略地图放大</h4><p>为了让用户在查询查询前能找到想去的站点，差查询后能对查找到的线路进行概览，需要将界面上缩略地图进行局部的放大，以便于用户方便的查看大地图。</p><p><img src="https://img-blog.csdnimg.cn/ef1f6e21aa5c43baa3ed2a09c400de29.png" alt="欢迎界面"><br><img src="https://img-blog.csdnimg.cn/ecab171b5417476db0ee3cff54b72582.jpeg" alt="线路查找示意"></p>]]></content>
-      
-      
-      <categories>
-          
-          <category> 知识笔记 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> 项目 </tag>
-            
-        </tags>
       
     </entry>
     
