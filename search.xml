@@ -80,8 +80,8 @@
     
     <entry>
       <title>两个月都没更新博客，这个人在干啥</title>
-      <link href="/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-copy-2/"/>
-      <url>/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-copy-2/</url>
+      <link href="/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
+      <url>/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
       
         <content type="html"><![CDATA[<p>好久没更新博客了，这一个多月确实是比较忙</p><p>陆陆续续每周都有考试要复习，还有软件的课设和数据库的Java课设要做，所以没更新博客了</p><p>刚好Java的项目最近基本做完了，现在会回复更新</p><p>已经24年啦，明天也是21岁生日，还是对前途没什么规划。。。</p><p>对考研没太大兴趣，就业现在环境又差，不知道该如何是好</p><p>总之先学着吧，干就完事了</p>]]></content>
       
@@ -99,8 +99,8 @@
     
     <entry>
       <title>两个月都没更新博客，这个人在干啥</title>
-      <link href="/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
-      <url>/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
+      <link href="/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-copy-2/"/>
+      <url>/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-copy-2/</url>
       
         <content type="html"><![CDATA[<p>好久没更新博客了，这一个多月确实是比较忙</p><p>陆陆续续每周都有考试要复习，还有软件的课设和数据库的Java课设要做，所以没更新博客了</p><p>刚好Java的项目最近基本做完了，现在会回复更新</p><p>已经24年啦，明天也是21岁生日，还是对前途没什么规划。。。</p><p>对考研没太大兴趣，就业现在环境又差，不知道该如何是好</p><p>总之先学着吧，干就完事了</p>]]></content>
       
@@ -1256,6 +1256,25 @@
     
     
     <entry>
+      <title>23/6/20 算法每日一题</title>
+      <link href="/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
+      <url>/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
+      
+        <content type="html"><![CDATA[<p>题目:<a href="https://ac.nowcoder.com/acm/contest/59284/E">幼稚园的树2</a></p><p>牛牛在幼稚园做义工，幼稚园中共有 n 棵树，第 1 天中午时它们的高度分别为：ℎ1,ℎ2,…,ℎn（单位：毫米）。</p><p>每一天的晚上第 i 棵树的高度会增加 ai毫米，而牛牛的任务则是在第二天的清晨检查每一棵树的高度，若某棵树的高度超过了 k 毫米牛牛就会将它的高度修剪为 b 毫米。</p><p>牛牛想请你帮它计算一下第 m 天中午每一棵树的高度。</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> N=<span class="number">1e5</span>+<span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">cut</span><span class="params">(<span class="type">int</span> h,<span class="type">int</span> ch,<span class="type">int</span> ach,<span class="type">int</span> gr,<span class="type">int</span> day)</span><span class="comment">//初始高度,要修剪的高度,修剪后高度,每天生长高度,天数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> cd1 = (ch-h)/gr+<span class="number">1</span>;<span class="comment">//第一轮到初始值需要的时间</span></span><br><span class="line">    <span class="keyword">if</span>(day&lt;cd1) <span class="keyword">return</span> h+gr*day;</span><br><span class="line">    <span class="keyword">else</span> day-=cd1,h=ach;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> cut_r = (ch-ach)/gr+<span class="number">1</span>;<span class="comment">//修剪后要生长的高度/每天生长高度 向上取整 =&gt; 每次修剪间隔的时间</span></span><br><span class="line">    <span class="keyword">return</span> ach+gr*(day%cut_r);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> t;</span><br><span class="line"><span class="type">int</span> n,m,k,b;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> tree[N];</span><br><span class="line"><span class="type">int</span> grow[N];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//cout&lt;&lt;cut(4,10,3,2,4);//初始高度为4,长到10后修建为3,每天长2,长4天</span></span><br><span class="line">    cin&gt;&gt;t;</span><br><span class="line">    <span class="keyword">while</span>(t--)</span><br><span class="line">    &#123;</span><br><span class="line">        cin&gt;&gt;n&gt;&gt;m&gt;&gt;k&gt;&gt;b;<span class="comment">//树数,第m天,长到k剪为b</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;tree[i]);</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;grow[i]);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) cout&lt;&lt;<span class="built_in">cut</span>(tree[i],k,b,grow[i],m<span class="number">-1</span>)&lt;&lt;<span class="string">&quot; &quot;</span>;</span><br><span class="line">        cout&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法学习 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>(项目)23年大二下软件课设</title>
       <link href="/2023/06/20/2023-6-20-%E9%A1%B9%E7%9B%AE-23%E8%BD%AF%E4%BB%B6%E8%AF%BE%E8%AE%BE/"/>
       <url>/2023/06/20/2023-6-20-%E9%A1%B9%E7%9B%AE-23%E8%BD%AF%E4%BB%B6%E8%AF%BE%E8%AE%BE/</url>
@@ -1275,25 +1294,6 @@
             <tag> 项目 </tag>
             
         </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>23/6/20 算法每日一题</title>
-      <link href="/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
-      <url>/2023/06/20/2023-6-20-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
-      
-        <content type="html"><![CDATA[<p>题目:<a href="https://ac.nowcoder.com/acm/contest/59284/E">幼稚园的树2</a></p><p>牛牛在幼稚园做义工，幼稚园中共有 n 棵树，第 1 天中午时它们的高度分别为：ℎ1,ℎ2,…,ℎn（单位：毫米）。</p><p>每一天的晚上第 i 棵树的高度会增加 ai毫米，而牛牛的任务则是在第二天的清晨检查每一棵树的高度，若某棵树的高度超过了 k 毫米牛牛就会将它的高度修剪为 b 毫米。</p><p>牛牛想请你帮它计算一下第 m 天中午每一棵树的高度。</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> N=<span class="number">1e5</span>+<span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">cut</span><span class="params">(<span class="type">int</span> h,<span class="type">int</span> ch,<span class="type">int</span> ach,<span class="type">int</span> gr,<span class="type">int</span> day)</span><span class="comment">//初始高度,要修剪的高度,修剪后高度,每天生长高度,天数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> cd1 = (ch-h)/gr+<span class="number">1</span>;<span class="comment">//第一轮到初始值需要的时间</span></span><br><span class="line">    <span class="keyword">if</span>(day&lt;cd1) <span class="keyword">return</span> h+gr*day;</span><br><span class="line">    <span class="keyword">else</span> day-=cd1,h=ach;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> cut_r = (ch-ach)/gr+<span class="number">1</span>;<span class="comment">//修剪后要生长的高度/每天生长高度 向上取整 =&gt; 每次修剪间隔的时间</span></span><br><span class="line">    <span class="keyword">return</span> ach+gr*(day%cut_r);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> t;</span><br><span class="line"><span class="type">int</span> n,m,k,b;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> tree[N];</span><br><span class="line"><span class="type">int</span> grow[N];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//cout&lt;&lt;cut(4,10,3,2,4);//初始高度为4,长到10后修建为3,每天长2,长4天</span></span><br><span class="line">    cin&gt;&gt;t;</span><br><span class="line">    <span class="keyword">while</span>(t--)</span><br><span class="line">    &#123;</span><br><span class="line">        cin&gt;&gt;n&gt;&gt;m&gt;&gt;k&gt;&gt;b;<span class="comment">//树数,第m天,长到k剪为b</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;tree[i]);</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;grow[i]);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;i++) cout&lt;&lt;<span class="built_in">cut</span>(tree[i],k,b,grow[i],m<span class="number">-1</span>)&lt;&lt;<span class="string">&quot; &quot;</span>;</span><br><span class="line">        cout&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      
-      
-      <categories>
-          
-          <category> 算法学习 </category>
-          
-      </categories>
-      
       
     </entry>
     
