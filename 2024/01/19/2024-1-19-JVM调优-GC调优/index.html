@@ -1,0 +1,351 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>（JVM调优）GC调优 | 半岛Hantou的博客</title><meta name="author" content="半岛Hantou"><meta name="copyright" content="半岛Hantou"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="GC调优GC调优指的是对JVM的垃圾回收部分进行调优，其目标是避免由垃圾回收引起的程序性能下降； 其调优的核心分为三部分  通用JVM参数的设置 特定垃圾回收期的JVM参数设置 解决频繁的Full GC造成的性能问题  GC调优的核心指标 业务吞吐量：一段时间内程序需要完成的业务数量 垃圾回收吞吐量：CPU用于执行用户代码的时间与CPU总执行时间的比值 延迟：用户发起一个请求到收到相应之间经历的时">
+<meta property="og:type" content="article">
+<meta property="og:title" content="（JVM调优）GC调优">
+<meta property="og:url" content="https://hantoul.github.io/2024/01/19/2024-1-19-JVM%E8%B0%83%E4%BC%98-GC%E8%B0%83%E4%BC%98/index.html">
+<meta property="og:site_name" content="半岛Hantou的博客">
+<meta property="og:description" content="GC调优GC调优指的是对JVM的垃圾回收部分进行调优，其目标是避免由垃圾回收引起的程序性能下降； 其调优的核心分为三部分  通用JVM参数的设置 特定垃圾回收期的JVM参数设置 解决频繁的Full GC造成的性能问题  GC调优的核心指标 业务吞吐量：一段时间内程序需要完成的业务数量 垃圾回收吞吐量：CPU用于执行用户代码的时间与CPU总执行时间的比值 延迟：用户发起一个请求到收到相应之间经历的时">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png">
+<meta property="article:published_time" content="2024-01-19T12:43:23.000Z">
+<meta property="article:modified_time" content="2024-01-19T12:43:45.000Z">
+<meta property="article:author" content="半岛Hantou">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png"><link rel="shortcut icon" href="/imgs/favicon.jpg"><link rel="canonical" href="https://hantoul.github.io/2024/01/19/2024-1-19-JVM%E8%B0%83%E4%BC%98-GC%E8%B0%83%E4%BC%98/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  noticeOutdate: {"limitDay":365,"position":"bottom","messagePrev":"本文发布于","messageNext":"天前, 所涉及的部分信息可能已经发生改变,请注意甄别。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":230},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '（JVM调优）GC调优',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-01-19 20:43:45'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = url => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      link.onload = () => resolve()
+      link.onerror = () => reject()
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-double-row-display@1.00/cardlistpost.min.css"/>
+<style>#recent-posts > .recent-post-item >.recent-post-info > .article-meta-wrap > .tags:before {content:"\A";
+  white-space: pre;}#recent-posts > .recent-post-item >.recent-post-info > .article-meta-wrap > .tags > .article-meta__separator{display:none}</style>
+<link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><link rel="stylesheet" href="/css/custom.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/assets/font-awesome-animation.min.css" media="defer" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/tag_plugins.css" media="defer" onload="this.media='all'"><script src="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/assets/carousel-touch.js"></script><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/animate.min.css" media="print" onload="this.media='all'"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/imgs/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">76</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/comments/"><i class="fa-fw fas fa-envelope-open"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png')"><nav id="nav"><span id="blog-info"><a href="/" title="半岛Hantou的博客"><span class="site-name">半岛Hantou的博客</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/comments/"><i class="fa-fw fas fa-envelope-open"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">（JVM调优）GC调优</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-01-19T12:43:23.000Z" title="发表于 2024-01-19 20:43:23">2024-01-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-01-19T12:43:45.000Z" title="更新于 2024-01-19 20:43:45">2024-01-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%9F%A5%E8%AF%86%E7%AC%94%E8%AE%B0/">知识笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="（JVM调优）GC调优"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="GC调优"><a href="#GC调优" class="headerlink" title="GC调优"></a>GC调优</h3><p>GC调优指的是对JVM的垃圾回收部分进行调优，其目标是避免由垃圾回收引起的程序性能下降；</p>
+<p>其调优的核心分为三部分</p>
+<ul>
+<li>通用JVM参数的设置</li>
+<li>特定垃圾回收期的JVM参数设置</li>
+<li>解决频繁的Full GC造成的性能问题</li>
+</ul>
+<h4 id="GC调优的核心指标"><a href="#GC调优的核心指标" class="headerlink" title="GC调优的核心指标"></a>GC调优的核心指标</h4><ul>
+<li>业务吞吐量：一段时间内程序需要完成的业务数量</li>
+<li>垃圾回收吞吐量：CPU用于执行用户代码的时间与CPU总执行时间的比值</li>
+<li>延迟：用户发起一个请求到收到相应之间经历的时间</li>
+<li>内存使用量：Java程序占系统内存的最大值，在满足上面的指标的前提下，内存用量越少越好</li>
+</ul>
+<h4 id="GC调优的方法"><a href="#GC调优的方法" class="headerlink" title="GC调优的方法"></a>GC调优的方法</h4><p>GC调优与内存调优一样，也是分为 发现-&gt;诊断-&gt;修复-&gt;验证 四个阶段</p>
+<h5 id="发现阶段"><a href="#发现阶段" class="headerlink" title="发现阶段"></a>发现阶段</h5><p>我们可以通过使用jstat工具，visualvm插件，Prometheus + Grafana，观察GC日志，GC Viewer工具，GCeasy工具来帮助我们发现问题</p>
+<h5 id="诊断阶段"><a href="#诊断阶段" class="headerlink" title="诊断阶段"></a>诊断阶段</h5><h6 id="CG的正常情况"><a href="#CG的正常情况" class="headerlink" title="CG的正常情况"></a>CG的正常情况</h6><p>呈现锯齿状，对象创建后内存使用增加，在经过垃圾清理后大幅回落，且每次回收之后的使用内存大小接近，留存对象较少</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401191645798.png" alt="image-20240119164533646"></p>
+<h6 id="缓存对象过多的情况"><a href="#缓存对象过多的情况" class="headerlink" title="缓存对象过多的情况"></a>缓存对象过多的情况</h6><p>与正常情况类似，但是在清理后的内存占用仍然较高</p>
+<p>原因：程序中保存了大量缓存对象（临时存储在内存中的数据），导致GC无法释放，可以使用MAT或者HeapHero等工具来具体分析原因</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401191647726.png" alt="image-20240119164733678"></p>
+<h6 id="内存泄露"><a href="#内存泄露" class="headerlink" title="内存泄露"></a>内存泄露</h6><p>呈现锯齿状，每次GC之后的内存使用一次比一次多，最后完全无法释放内存，导致OutOfMemory错误</p>
+<p>原因：程序中保存了大量的内存泄露对象，导致GC之后无法释放，同样可以使用MAT或者HeapHero等工具来具体分析原因</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401191648239.png" alt="image-20240119164853182"></p>
+<h6 id="连续的Full-GC"><a href="#连续的Full-GC" class="headerlink" title="连续的Full GC"></a>连续的Full GC</h6><p>在某个时间点出现多次Full GC，CPU使用率拉满，无法处理用户请求，一段时间后恢复正常</p>
+<p>原因：在该时间点请求量激增，程序开始产生大量对象，同时垃圾收集速度跟不上对象创建的速度，进而导致不断地Full GC</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401191652825.png" alt="image-20240119165258778"></p>
+<h6 id="元空间不足导致的Full-GC"><a href="#元空间不足导致的Full-GC" class="headerlink" title="元空间不足导致的Full GC"></a>元空间不足导致的Full GC</h6><p>发生该问题时，堆内存占用明明不高，可是还是不断的发生Full GC</p>
+<p>原因：元空间大小不足，导致持续触发Full GC来回收元空间的数据</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401191655451.png" alt="image-20240119165504389"></p>
+<h5 id="修复阶段"><a href="#修复阶段" class="headerlink" title="修复阶段"></a>修复阶段</h5><p>下面介绍四种解决GC的手段，第四种方案仅建议在前三种方案无法解决时使用</p>
+<h6 id="1-优化JVM参数"><a href="#1-优化JVM参数" class="headerlink" title="1.优化JVM参数"></a>1.优化JVM参数</h6><ul>
+<li><p>参数1：<strong>-Xmx 和 -Xms</strong></p>
+<p>-Xmx 设置的是最大堆内存，需要注意的是，计算可用内存时，需要将元数据、操作系统和其他软件占用的内存排除掉。eg：服务器内存4G，操作系统+元空间最大值+其它软件占用1.5G，-Xmx可以设置为2g。</p>
+<p>-Xms 设置初始堆大小，这里建议将Xms和Xmx设置一样大，这样有以下优点</p>
+<p>运行性能好（减少堆扩容导致的性能损耗），可用性好（与同在运行的其他程序抢占内存），启动速度快（GC次数少）</p>
+<p><strong>最合理的设置方式应该是根据最大并发量估算服务器的配置，然后再根据服务器配置计算最大堆内存的值。</strong></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401191702489.png" alt="image-20240119170226451"></p>
+</li>
+<li><p><strong>-xx:MaxMetaspaceSize 和 -xx:MetaSpaceSice</strong></p>
+<p>-XX:MaxMetaspaceSize=值 参数指的是最大元空间大小，默认值比较大，如果出现元空间内存泄漏会让操作系统可用内存不可控，建议根据测试情况设置最大值，一般设置为256m。</p>
+<p>-XX:MetaspaceSize=值 参数指的是到达这个值之后会触发FULLGC（网上很多文章的初始元空间大小是错误的），后续什么时候再触发JVM会自行计算。如果设置为和MaxMetaspaceSize一样大，就不会FULLGC，但是对象也无法回收。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401191702687.png" alt="image-20240119170242650"></p>
+</li>
+<li><p><strong>-Xss</strong> 虚拟机栈大小</p>
+<p>如果我们不指定栈的大小，JVM 将创建一个具有默认大小的栈。大小取决于操作系统和计算机的体系结构。</p>
+</li>
+<li><p>不建议手动设置的参数</p>
+<ul>
+<li><p>-Xmn 年轻代的大小；在设置这个值之前需要进行大量的计算，不建议手动修改。同时如果使用G1垃圾回收器，就尽量不要使用该值，因为G1会动态地调整年轻代的大小</p>
+</li>
+<li><p>‐XX:SurvivorRatio 伊甸园区和幸存者区的大小比例，默认值为8。</p>
+</li>
+<li><p>‐XX:MaxTenuringThreshold 最大晋升阈值，年龄大于此值之后，会进入老年代。JVM有动态年龄判断机制：将年龄从小到大的对象占据的空间加起来，如果大于survivor区域的50%，然后把等于或大于该年龄的对象，放入到老年代，所以也不建议修改</p>
+</li>
+</ul>
+</li>
+<li><p>其他参数</p>
+<ul>
+<li><p><strong>-XX:+DisableExplicitGC</strong></p>
+<p>禁止在代码中使用System.gc()， System.gc()可能会引起FULLGC，在代码中尽量不要使用。使用DisableExplicitGC参数可以禁止使用System.gc()方法调用</p>
+</li>
+<li><p><strong>-XX:+HeapDumpOnOutOfMemoryError</strong>：发生OutOfMemoryError错误时，自动生成hprof内存快照文件。</p>
+<p>-XX:HeapDumpPath=<path>：指定hprof文件的输出路径。</p>
+</li>
+<li><p>打印<strong>GC日志</strong></p>
+<p>JDK8及之前 ： -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:文件路径</p>
+<p>JDK9及之后 ： -Xlog:gc*:file=文件路径</p>
+</li>
+</ul>
+</li>
+<li><p>JVM参数模版</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-Xms1g</span><br><span class="line">-Xmx1g</span><br><span class="line">-Xss256k</span><br><span class="line">-XX:MaxMetaspaceSize=512m </span><br><span class="line">-XX:+DisableExplicitGC</span><br><span class="line">-XX:+HeapDumpOnOutOfMemoryError</span><br><span class="line">-XX:HeapDumpPath=/opt/logs/my-service.hprof</span><br><span class="line">-XX:+PrintGCDetails</span><br><span class="line">-XX:+PrintGCDateStamps</span><br><span class="line">-Xloggc:文件路径</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：</p>
+<p>JDK9及之后gc日志输出修改为 -Xlog:gc*:file=文件名</p>
+<p>堆内存大小和栈内存大小根据实际情况灵活调整。</p>
+</blockquote>
+</li>
+</ul>
+<h6 id="2-减少对象产生"><a href="#2-减少对象产生" class="headerlink" title="2.减少对象产生"></a>2.减少对象产生</h6><p>大多数场景下的FULLGC是由于对象产生速度过快导致的，减少对象产生可以有效的缓解FULLGC的发生</p>
+<ul>
+<li>对对象进行复用：重复创建和销毁对象会增加GC的负担。因此，可以尽量避免频繁创建和销毁对象，而是通过对象的复用来减少对象的产生。</li>
+<li>使用对象池：对象池是一种缓存对象的机制。通过预先创建一定数量的对象，并将其保存在池中，当需要对象时，从池中获取，使用完毕后再放回池中。这样可以避免频繁创建和销毁对象，减少GC的压力。</li>
+<li>及时释放对象引用：在对象不再使用时，及时将其引用置为null</li>
+</ul>
+<h6 id="3-更换垃圾回收器"><a href="#3-更换垃圾回收器" class="headerlink" title="3.更换垃圾回收器"></a>3.更换垃圾回收器</h6><ul>
+<li><p>垃圾回收器的组合关系</p>
+<p>由于垃圾回收器分为年轻代和老年代，所以除了G1以外的垃圾处理器需要根据年轻代和老年代进行成对组合的使用</p>
+<p>关系图如下：</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401192032340.png" alt="image-20240119203154232"></p>
+</li>
+</ul>
+<p>可以通过测试不同组合在特定负载要求下的性能表现，找到适用的垃圾处理器</p>
+<h6 id="4-优化垃圾回收器参数"><a href="#4-优化垃圾回收器参数" class="headerlink" title="4.优化垃圾回收器参数"></a>4.优化垃圾回收器参数</h6><p>尽量在前三种方法无效时再使用这种方法；具体需要根据产生性能问题的原因来进行针对性的排查。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1r94y1b7eS?p=41&amp;vd_source=ccb7919bcde1355acd4bb39725e50302">黑马JVM虚拟机入门到实战</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://hantoul.github.io">半岛Hantou</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://hantoul.github.io/2024/01/19/2024-1-19-JVM%E8%B0%83%E4%BC%98-GC%E8%B0%83%E4%BC%98/">https://hantoul.github.io/2024/01/19/2024-1-19-JVM%E8%B0%83%E4%BC%98-GC%E8%B0%83%E4%BC%98/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://hantoul.github.io" target="_blank">半岛Hantou的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/JVM/">JVM</a></div><div class="post_share"><div class="social-share" data-image="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/01/18/2024-1-18-JVM%E8%B0%83%E4%BC%98-%E5%86%85%E5%AD%98%E8%B0%83%E4%BC%98/" title="（JVM调优）内存调优"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">（JVM调优）内存调优</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/01/15/2024-1-15-JVM-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" title="（JVM）JVM的启动流程"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-15</div><div class="title">（JVM）JVM的启动流程</div></div></a></div><div><a href="/2024/01/16/2024-1-16-JVM-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" title="（JVM）JVM的内存管理"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-16</div><div class="title">（JVM）JVM的内存管理</div></div></a></div><div><a href="/2024/01/17/2024-1-17-JVM-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" title="（JVM）JVM的垃圾回收机制"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-17</div><div class="title">（JVM）JVM的垃圾回收机制</div></div></a></div><div><a href="/2024/01/17/2024-1-17-JVM-%E7%AC%94%E8%AE%B0%E6%B1%87%E6%80%BB/" title="（JVM）JVM笔记汇总"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-17</div><div class="title">（JVM）JVM笔记汇总</div></div></a></div><div><a href="/2024/01/18/2024-1-18-JVM%E8%B0%83%E4%BC%98-%E5%86%85%E5%AD%98%E8%B0%83%E4%BC%98/" title="（JVM调优）内存调优"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-01-18</div><div class="title">（JVM调优）内存调优</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/imgs/head.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">半岛Hantou</div><div class="author-info__description">一个个人博客</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">76</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/HantouL"><i class="fab fa-github"></i><span>关注我</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/HantouL" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:hantou0113@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://space.bilibili.com/11496739" target="_blank" title="Bilibili"><i class="fa-brands fa-bilibili"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客!</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#GC%E8%B0%83%E4%BC%98"><span class="toc-number">1.</span> <span class="toc-text">GC调优</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#GC%E8%B0%83%E4%BC%98%E7%9A%84%E6%A0%B8%E5%BF%83%E6%8C%87%E6%A0%87"><span class="toc-number">1.1.</span> <span class="toc-text">GC调优的核心指标</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#GC%E8%B0%83%E4%BC%98%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">1.2.</span> <span class="toc-text">GC调优的方法</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8F%91%E7%8E%B0%E9%98%B6%E6%AE%B5"><span class="toc-number">1.2.1.</span> <span class="toc-text">发现阶段</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AF%8A%E6%96%AD%E9%98%B6%E6%AE%B5"><span class="toc-number">1.2.2.</span> <span class="toc-text">诊断阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#CG%E7%9A%84%E6%AD%A3%E5%B8%B8%E6%83%85%E5%86%B5"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">CG的正常情况</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E5%AF%B9%E8%B1%A1%E8%BF%87%E5%A4%9A%E7%9A%84%E6%83%85%E5%86%B5"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">缓存对象过多的情况</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">内存泄露</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E8%BF%9E%E7%BB%AD%E7%9A%84Full-GC"><span class="toc-number">1.2.2.4.</span> <span class="toc-text">连续的Full GC</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%85%83%E7%A9%BA%E9%97%B4%E4%B8%8D%E8%B6%B3%E5%AF%BC%E8%87%B4%E7%9A%84Full-GC"><span class="toc-number">1.2.2.5.</span> <span class="toc-text">元空间不足导致的Full GC</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E9%98%B6%E6%AE%B5"><span class="toc-number">1.2.3.</span> <span class="toc-text">修复阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#1-%E4%BC%98%E5%8C%96JVM%E5%8F%82%E6%95%B0"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">1.优化JVM参数</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#2-%E5%87%8F%E5%B0%91%E5%AF%B9%E8%B1%A1%E4%BA%A7%E7%94%9F"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">2.减少对象产生</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#3-%E6%9B%B4%E6%8D%A2%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">3.更换垃圾回收器</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#4-%E4%BC%98%E5%8C%96%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8%E5%8F%82%E6%95%B0"><span class="toc-number">1.2.3.4.</span> <span class="toc-text">4.优化垃圾回收器参数</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number"></span> <span class="toc-text">参考资料</span></a></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2024/01/19/2024-1-19-JVM%E8%B0%83%E4%BC%98-GC%E8%B0%83%E4%BC%98/" title="（JVM调优）GC调优"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="（JVM调优）GC调优"/></a><div class="content"><a class="title" href="/2024/01/19/2024-1-19-JVM%E8%B0%83%E4%BC%98-GC%E8%B0%83%E4%BC%98/" title="（JVM调优）GC调优">（JVM调优）GC调优</a><time datetime="2024-01-19T12:43:23.000Z" title="发表于 2024-01-19 20:43:23">2024-01-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/01/18/2024-1-18-JVM%E8%B0%83%E4%BC%98-%E5%86%85%E5%AD%98%E8%B0%83%E4%BC%98/" title="（JVM调优）内存调优"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="（JVM调优）内存调优"/></a><div class="content"><a class="title" href="/2024/01/18/2024-1-18-JVM%E8%B0%83%E4%BC%98-%E5%86%85%E5%AD%98%E8%B0%83%E4%BC%98/" title="（JVM调优）内存调优">（JVM调优）内存调优</a><time datetime="2024-01-18T15:11:39.000Z" title="发表于 2024-01-18 23:11:39">2024-01-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/01/17/2024-1-17-JVM-%E7%AC%94%E8%AE%B0%E6%B1%87%E6%80%BB/" title="（JVM）JVM笔记汇总"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="（JVM）JVM笔记汇总"/></a><div class="content"><a class="title" href="/2024/01/17/2024-1-17-JVM-%E7%AC%94%E8%AE%B0%E6%B1%87%E6%80%BB/" title="（JVM）JVM笔记汇总">（JVM）JVM笔记汇总</a><time datetime="2024-01-17T13:50:23.000Z" title="发表于 2024-01-17 21:50:23">2024-01-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/01/17/2024-1-17-JVM-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" title="（JVM）JVM的垃圾回收机制"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="（JVM）JVM的垃圾回收机制"/></a><div class="content"><a class="title" href="/2024/01/17/2024-1-17-JVM-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" title="（JVM）JVM的垃圾回收机制">（JVM）JVM的垃圾回收机制</a><time datetime="2024-01-17T09:04:18.000Z" title="发表于 2024-01-17 17:04:18">2024-01-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/01/16/2024-1-16-JVM-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" title="（JVM）JVM的内存管理"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="（JVM）JVM的内存管理"/></a><div class="content"><a class="title" href="/2024/01/16/2024-1-16-JVM-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" title="（JVM）JVM的内存管理">（JVM）JVM的内存管理</a><time datetime="2024-01-16T12:23:16.000Z" title="发表于 2024-01-16 20:23:16">2024-01-16</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2024 By 半岛Hantou</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="30" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && (location.pathname ==='/'|| '/' ==='all')){
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="width:100%;height: auto"><div id="catalog_magnet"><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/知识笔记/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">📚 半岛の知识笔记 (38)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/生活日常/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">💡 半岛の生活日常 (6)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/茶余饭后/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">🐱‍👓 半岛の茶余饭后 (3)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/算法学习/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">📒 半岛の算法学习 (26)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/优质转载/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">👩‍💻 半岛の优质转载 (2)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/观影墙/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">🎥 半岛の观影墙 (1)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><a class="magnet_link_more"  href="https://hantoul.github.io/categories" style="flex:1;text-align: center;margin-bottom: 10px;">查看更多...</a></div></div>';
+    console.log('已挂载magnet')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script><style>#catalog_magnet{flex-wrap: wrap;display: flex;width:100%;justify-content:space-between;padding: 10px 10px 0 10px;align-content: flex-start;}.magnet_item{flex-basis: calc(50% - 5px);background: #f2f2f2;margin-bottom: 10px;border-radius: 8px;transition: all 0.2s ease-in-out;}.magnet_item:hover{background: #b30070}.magnet_link_more{color:#555}.magnet_link{color:black}.magnet_link:hover{color:white}@media screen and (max-width: 600px) {.magnet_item {flex-basis: 100%;}}.magnet_link_context{display:flex;padding: 10px;font-size:16px;transition: all 0.2s ease-in-out;}.magnet_link_context:hover{padding: 10px 20px;}</style>
+    <style></style><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'null'.split(',');
+  var cpage = location.pathname;
+  var epage = '/';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '114.32,30.35';
+  var clock_default_rectangle_enable = 'false';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><script data-pjax>
+  function butterfly_footer_beautify_injector_config(){
+    var parent_div_git = document.getElementById('footer-wrap');
+    var item_html = '<div id="workboard"></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v6.2.0" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Frame-Hexo-blue?style=flat&amp;logo=hexo" alt=""/></a><a class="github-badge" target="_blank" href="https://butterfly.js.org/" style="margin-inline:5px" data-title="主题版本Butterfly_v4.6.0" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Theme-Butterfly-6513df?style=flat&amp;logo=bitdefender" alt=""/></a><a class="github-badge" target="_blank" href="https://vercel.com/" style="margin-inline:5px" data-title="本站采用多线部署，主线路托管于Vercel" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Hosted-Vercel-brightgreen?style=flat&amp;logo=Vercel" alt=""/></a><a class="github-badge" target="_blank" href="https://dashboard.4everland.org/" style="margin-inline:5px" data-title="本站采用多线部署，备用线路托管于4EVERLAND" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Hosted-4EVERLAND-22DDDD?style=flat&amp;logo=IPFS" alt=""/></a><a class="github-badge" target="_blank" href="https://github.com/HantouL/HantouL.github.io" style="margin-inline:5px" data-title="本站项目由Github托管" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Source-Github-d021d6?style=flat&amp;logo=GitHub" alt=""/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Copyright-BY--NC--SA%204.0-d42328?style=flat&amp;logo=Claris" alt=""/></a></p>';
+    console.log('已挂载butterfly_footer_beautify')
+    parent_div_git.insertAdjacentHTML("beforeend",item_html)
+    }
+  var elist = 'null'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var flag = 0;
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_footer_beautify_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_footer_beautify_injector_config();
+  }
+  </script><script async src="/js/runtime.js"></script><script async src="//at.alicdn.com/t/font_2032782_8d5kxvn09md.js"></script><div class="js-pjax"><script async="async">var arr = document.getElementsByClassName('recent-post-item');
+for(var i = 0;i<arr.length;i++){
+    arr[i].classList.add('wow');
+    arr[i].classList.add('animate__zoomIn');
+    arr[i].setAttribute('data-wow-duration', '2s');
+    arr[i].setAttribute('data-wow-delay', '1s');
+    arr[i].setAttribute('data-wow-offset', '100');
+    arr[i].setAttribute('data-wow-iteration', '1');
+  }</script><script async="async">var arr = document.getElementsByClassName('card-widget');
+for(var i = 0;i<arr.length;i++){
+    arr[i].classList.add('wow');
+    arr[i].classList.add('animate__zoomIn');
+    arr[i].setAttribute('data-wow-duration', '');
+    arr[i].setAttribute('data-wow-delay', '');
+    arr[i].setAttribute('data-wow-offset', '');
+    arr[i].setAttribute('data-wow-iteration', '');
+  }</script></div><script defer src="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/wow.min.js"></script><script defer src="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/wow_init.js"></script><!-- hexo injector body_end end --></body></html>
