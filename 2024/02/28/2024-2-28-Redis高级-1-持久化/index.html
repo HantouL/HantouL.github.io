@@ -1,0 +1,334 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>Redis高级(1) - 持久化 | 半岛Hantou的博客</title><meta name="author" content="半岛Hantou"><meta name="copyright" content="半岛Hantou"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="Redis高级  —- 持久化(1)RDBRDB就是Redis数据快照,其将Redis的数据本身保存到硬盘 如果直接使用save来执行RDB,会阻塞所有命令 建议使用bgsave,会开启子进程来执行RDB,避免主进程收到阻塞 RDB在Redis内部的使用redis.conf中配置了默认的RDB机制 1234567891011121314# 开启RDB# save &quot;&quot; 表示禁用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis高级(1) - 持久化">
+<meta property="og:url" content="https://hantoul.github.io/2024/02/28/2024-2-28-Redis%E9%AB%98%E7%BA%A7-1-%E6%8C%81%E4%B9%85%E5%8C%96/index.html">
+<meta property="og:site_name" content="半岛Hantou的博客">
+<meta property="og:description" content="Redis高级  —- 持久化(1)RDBRDB就是Redis数据快照,其将Redis的数据本身保存到硬盘 如果直接使用save来执行RDB,会阻塞所有命令 建议使用bgsave,会开启子进程来执行RDB,避免主进程收到阻塞 RDB在Redis内部的使用redis.conf中配置了默认的RDB机制 1234567891011121314# 开启RDB# save &quot;&quot; 表示禁用">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310250011952.jpg">
+<meta property="article:published_time" content="2024-02-28T05:37:51.000Z">
+<meta property="article:modified_time" content="2024-02-28T05:37:54.000Z">
+<meta property="article:author" content="半岛Hantou">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310250011952.jpg"><link rel="shortcut icon" href="/imgs/favicon.jpg"><link rel="canonical" href="https://hantoul.github.io/2024/02/28/2024-2-28-Redis%E9%AB%98%E7%BA%A7-1-%E6%8C%81%E4%B9%85%E5%8C%96/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  noticeOutdate: {"limitDay":365,"position":"bottom","messagePrev":"本文发布于","messageNext":"天前, 所涉及的部分信息可能已经发生改变,请注意甄别。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":230},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Redis高级(1) - 持久化',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-02-28 13:37:54'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = url => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      link.onload = () => resolve()
+      link.onerror = () => reject()
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-double-row-display@1.00/cardlistpost.min.css"/>
+<style>#recent-posts > .recent-post-item >.recent-post-info > .article-meta-wrap > .tags:before {content:"\A";
+  white-space: pre;}#recent-posts > .recent-post-item >.recent-post-info > .article-meta-wrap > .tags > .article-meta__separator{display:none}</style>
+<link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><link rel="stylesheet" href="/css/custom.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/assets/font-awesome-animation.min.css" media="defer" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/tag_plugins.css" media="defer" onload="this.media='all'"><script src="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/assets/carousel-touch.js"></script><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/animate.min.css" media="print" onload="this.media='all'"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/imgs/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">79</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">17</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/comments/"><i class="fa-fw fas fa-envelope-open"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310250011952.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="半岛Hantou的博客"><span class="site-name">半岛Hantou的博客</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/comments/"><i class="fa-fw fas fa-envelope-open"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Redis高级(1) - 持久化</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-02-28T05:37:51.000Z" title="发表于 2024-02-28 13:37:51">2024-02-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-02-28T05:37:54.000Z" title="更新于 2024-02-28 13:37:54">2024-02-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%9F%A5%E8%AF%86%E7%AC%94%E8%AE%B0/">知识笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Redis高级(1) - 持久化"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="Redis高级-—-持久化-1"><a href="#Redis高级-—-持久化-1" class="headerlink" title="Redis高级  —- 持久化(1)"></a>Redis高级  —- 持久化(1)</h1><h2 id="RDB"><a href="#RDB" class="headerlink" title="RDB"></a>RDB</h2><p>RDB就是Redis数据快照,其将Redis的数据本身保存到硬盘</p>
+<p>如果直接使用<code>save</code>来执行RDB,会阻塞所有命令</p>
+<p>建议使用<code>bgsave</code>,会开启子进程来执行RDB,避免主进程收到阻塞</p>
+<h3 id="RDB在Redis内部的使用"><a href="#RDB在Redis内部的使用" class="headerlink" title="RDB在Redis内部的使用"></a>RDB在Redis内部的使用</h3><p>redis.conf中配置了默认的RDB机制</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 开启RDB</span></span><br><span class="line"><span class="comment"># save &quot;&quot; 表示禁用RDB</span></span><br><span class="line"><span class="comment"># 3600s内,若至少有1个key被修改,则执行bgsave</span></span><br><span class="line"><span class="attr">save</span> <span class="string">3600 1</span></span><br><span class="line"><span class="attr">save</span> <span class="string">300 100</span></span><br><span class="line"><span class="attr">save</span> <span class="string">60 10000</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"># 是否压缩rdb文件</span></span><br><span class="line"><span class="attr">rdbcompression</span> <span class="string">yes</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"># rdb文件名</span></span><br><span class="line"><span class="attr">dbfilename</span> <span class="string">dump.rdb</span></span><br><span class="line"><span class="comment"># 文件保存的路径目录</span></span><br><span class="line"><span class="attr">dir</span> <span class="string">./</span></span><br></pre></td></tr></table></figure>
+<h3 id="RDB原理"><a href="#RDB原理" class="headerlink" title="RDB原理"></a>RDB原理</h3><p>bgsave开始时会fork主进程得到子进程，子进程<strong>共享</strong>主进程的内存数据。完成fork后读取内存数据并写入 RDB 文件。</p>
+<p>fork采用的是copy-on-write技术：</p>
+<ul>
+<li>当主进程执行读操作时，访问共享内存；</li>
+<li>当主进程执行写操作时，则会<strong>拷贝一份数据</strong>，执行写操作。</li>
+</ul>
+<hr>
+<h2 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h2><p>即追加文件,Redis处理的每一个写命令都会记录在AOF,可看作命令日志文件</p>
+<p>AOF默认关闭,需要修改redis.conf配置文件来开启AOF：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 是否开启AOF功能，默认是no</span></span><br><span class="line"><span class="attr">appendonly</span> <span class="string">yes</span></span><br><span class="line"><span class="comment"># AOF文件的名称</span></span><br><span class="line"><span class="attr">appendfilename</span> <span class="string">&quot;appendonly.aof&quot;</span></span><br></pre></td></tr></table></figure>
+<p>AOF的命令记录的频率也可以通过redis.conf文件来配：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示每执行一次写命令，立即记录到AOF文件</span></span><br><span class="line"><span class="attr">appendfsync</span> <span class="string">always </span></span><br><span class="line"><span class="comment"># 写命令执行完先放入AOF缓冲区，然后表示每隔1秒将缓冲区数据写到AOF文件，是默认方案</span></span><br><span class="line"><span class="attr">appendfsync</span> <span class="string">everysec </span></span><br><span class="line"><span class="comment"># 写命令执行完先放入AOF缓冲区，由操作系统决定何时将缓冲区内容写回磁盘</span></span><br><span class="line"><span class="attr">appendfsync</span> <span class="string">no</span></span><br></pre></td></tr></table></figure>
+<p>三种策略对比：</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202402262358611.png" alt=""></p>
+<p>RDB与AOF对比</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202402270010354.png" alt=""></p>
+<h3 id="AOF文件重写"><a href="#AOF文件重写" class="headerlink" title="AOF文件重写"></a>AOF文件重写</h3><p>如果之前写入了a,然后又写入了a,会执行文件重写,将用最新的值替代之前的值</p>
+<p>Redis也会在触发阈值时自动去重写AOF文件。阈值也可以在redis.conf中配置：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># AOF文件比上次文件 增长超过多少百分比则触发重写</span></span><br><span class="line"><span class="attr">auto-aof-rewrite-percentage</span> <span class="string">100</span></span><br><span class="line"><span class="comment"># AOF文件体积最小多大以上才触发重写 </span></span><br><span class="line"><span class="attr">auto-aof-rewrite-min-size</span> <span class="string">64mb </span></span><br></pre></td></tr></table></figure>
+<h2 id="集群"><a href="#集群" class="headerlink" title="集群"></a>集群</h2><h3 id="数据同步原理"><a href="#数据同步原理" class="headerlink" title="数据同步原理"></a>数据同步原理</h3><p>主从第一次同步数据是<strong>全量同步</strong>,从节点会从主节点中拉取所有数据bgsave(RBD)</p>
+<p>新写的数据会使用AOF进行同步,将在RDB的时间内收到的命令在从节点中再执行一次(<strong>增量数据同步</strong>)</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202402271414009.png" alt="image-20240227141357869"></p>
+<h4 id="数据同步情况的判断"><a href="#数据同步情况的判断" class="headerlink" title="数据同步情况的判断"></a>数据同步情况的判断</h4><ul>
+<li>Replication Id: 简称replid,是数据集的标记; slave会继承master的replid</li>
+<li>offset: 偏移量,若从节点offset小于offset,则说明从节点数据落后于主节点</li>
+</ul>
+<blockquote>
+<p>主节点的增量同步数据若过长时间没有存入从节点,会导致溢出的数据覆盖原有数据,这时从节点要获取主节点数据就需要获取全量数据了</p>
+<p>这个问题无法避免,只能尽量去优化,减少其出现的概率</p>
+</blockquote>
+<h4 id="数据同步的优化"><a href="#数据同步的优化" class="headerlink" title="数据同步的优化"></a>数据同步的优化</h4><ul>
+<li>在master中配置repl-diskless-sync yes启用无磁盘复制，避免全量同步时的磁盘IO。</li>
+<li>Redis单节点上的内存占用不要太大，减少RDB导致的过多磁盘IO</li>
+<li>适当提高repl_baklog的大小，发现slave宕机时尽快实现故障恢复，尽可能避免全量同步</li>
+<li>限制一个master上的slave节点数量，如果实在是太多slave，则可以采用主-从-从<u>链式结构</u>，减少master压力</li>
+</ul>
+<h3 id="哨兵"><a href="#哨兵" class="headerlink" title="哨兵"></a>哨兵</h3><p>上面的最基础的集群中,若主节点宕机了,那么整个服务就会陷入混乱; 这时就引入了哨兵Sentinel机制</p>
+<p>哨兵负责衔接外部的请求和Redis集群,能为Redis访问提供正确的结点</p>
+<h4 id="服务状态监控"><a href="#服务状态监控" class="headerlink" title="服务状态监控"></a>服务状态监控</h4><p>Sentinel的服务状态监控基于心跳机制,分为主观下线和客观下线</p>
+<ul>
+<li>主观下线: 某个Sentinel节点发现某实例未在规定时间内响应,则将其记为主管下线</li>
+<li>客观下线: 若超过某个数量(最好是过半哨兵)的哨兵都认为某个节点主观下线了,就将这个实例记为客观下线</li>
+</ul>
+<h4 id="选举"><a href="#选举" class="headerlink" title="选举"></a>选举</h4><p>当发现master出现问题,就需要哨兵们选举新的master</p>
+<ul>
+<li>首先判断slave和master断开时间的长短,若超过指定值则会将该slave排除</li>
+<li>再判断slave的优先级,越小越高,0不参加选举</li>
+<li>再判断offset值,越大说明越新,优先级更高</li>
+</ul>
+<h4 id="故障转移"><a href="#故障转移" class="headerlink" title="故障转移"></a>故障转移</h4><ul>
+<li>哨兵给slave发送命令让该节点成为master</li>
+<li>哨兵再给其余slave发送slave of (新主节点地址),让这些slave成为新的master的从节点</li>
+<li>最后哨兵将故障的master节点标记为slave,若其在之后恢复正常了,会成为新master的从节点</li>
+</ul>
+<h4 id="哨兵集群搭建"><a href="#哨兵集群搭建" class="headerlink" title="哨兵集群搭建"></a>哨兵集群搭建</h4><p>跟搭建redis集群差不多,不赘述了</p>
+<blockquote>
+<p>这里在搭建的时候,redis声明ip跟着文档填忘了改成自己的了,抓了一个多小时虫子…</p>
+</blockquote>
+<h3 id="分片集群"><a href="#分片集群" class="headerlink" title="分片集群"></a>分片集群</h3><p>主从+哨兵实现了高可用高并发,但是仍然没有解决两个问题</p>
+<ul>
+<li>海量数据存储</li>
+<li>高并发写</li>
+</ul>
+<p>使用分片集群可以结局上述问题, 分片集群的特征如下</p>
+<ul>
+<li>集群中有多个master, 保存不同数据</li>
+<li>每个master都有多个slave结点</li>
+<li>master之间互相ping来检测状态</li>
+<li>客户端可以访问任意节点,最终会通过redis集群内部的路由转发到正确的节点</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202402281116061.png" alt="image-20240228111619707"></p>
+<h4 id="散列插槽"><a href="#散列插槽" class="headerlink" title="散列插槽"></a>散列插槽</h4><p>Redis会把每一个节点映射到一个插槽上,数据的key不与节点绑定,而是与插槽绑定; Redis会根据key来计算插槽值,然后把对应的值放到相应的插槽中, 实际上就是一个hash</p>
+<h4 id="集训伸缩"><a href="#集训伸缩" class="headerlink" title="集训伸缩"></a>集训伸缩</h4><p>Redis集群支持动态的增加或者减少实例数量</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://hantoul.github.io">半岛Hantou</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://hantoul.github.io/2024/02/28/2024-2-28-Redis%E9%AB%98%E7%BA%A7-1-%E6%8C%81%E4%B9%85%E5%8C%96/">https://hantoul.github.io/2024/02/28/2024-2-28-Redis%E9%AB%98%E7%BA%A7-1-%E6%8C%81%E4%B9%85%E5%8C%96/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://hantoul.github.io" target="_blank">半岛Hantou的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Redis/">Redis</a></div><div class="post_share"><div class="social-share" data-image="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310250011952.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/02/26/2024-2-26-Redis-%E7%A7%92%E6%9D%80%E7%AC%94%E8%AE%B01/" title="Redis秒杀代码(逐步测试修改)"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310250011952.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Redis秒杀代码(逐步测试修改)</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/10/25/2023-10-25-Redis-6-%E7%AC%94%E8%AE%B0/" title="Redis6 学习笔记"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310250011952.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-10-25</div><div class="title">Redis6 学习笔记</div></div></a></div><div><a href="/2024/02/21/2024-2-21-Redis-%E7%A7%92%E6%9D%80%E7%AC%94%E8%AE%B01-copy/" title="Redis-秒杀笔记1"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310250011952.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-21</div><div class="title">Redis-秒杀笔记1</div></div></a></div><div><a href="/2024/02/26/2024-2-26-Redis-%E7%A7%92%E6%9D%80%E7%AC%94%E8%AE%B01/" title="Redis秒杀代码(逐步测试修改)"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310250011952.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-02-26</div><div class="title">Redis秒杀代码(逐步测试修改)</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/imgs/head.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">半岛Hantou</div><div class="author-info__description">一个个人博客</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">79</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">17</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/HantouL"><i class="fab fa-github"></i><span>关注我</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/HantouL" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:hantou0113@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://space.bilibili.com/11496739" target="_blank" title="Bilibili"><i class="fa-brands fa-bilibili"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客!</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Redis%E9%AB%98%E7%BA%A7-%E2%80%94-%E6%8C%81%E4%B9%85%E5%8C%96-1"><span class="toc-number">1.</span> <span class="toc-text">Redis高级  —- 持久化(1)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RDB"><span class="toc-number">1.1.</span> <span class="toc-text">RDB</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#RDB%E5%9C%A8Redis%E5%86%85%E9%83%A8%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.1.1.</span> <span class="toc-text">RDB在Redis内部的使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RDB%E5%8E%9F%E7%90%86"><span class="toc-number">1.1.2.</span> <span class="toc-text">RDB原理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AOF"><span class="toc-number">1.2.</span> <span class="toc-text">AOF</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#AOF%E6%96%87%E4%BB%B6%E9%87%8D%E5%86%99"><span class="toc-number">1.2.1.</span> <span class="toc-text">AOF文件重写</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4"><span class="toc-number">1.3.</span> <span class="toc-text">集群</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E5%8E%9F%E7%90%86"><span class="toc-number">1.3.1.</span> <span class="toc-text">数据同步原理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%83%85%E5%86%B5%E7%9A%84%E5%88%A4%E6%96%AD"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">数据同步情况的判断</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E7%9A%84%E4%BC%98%E5%8C%96"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">数据同步的优化</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%93%A8%E5%85%B5"><span class="toc-number">1.3.2.</span> <span class="toc-text">哨兵</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%8A%B6%E6%80%81%E7%9B%91%E6%8E%A7"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">服务状态监控</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%89%E4%B8%BE"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">选举</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%85%E9%9A%9C%E8%BD%AC%E7%A7%BB"><span class="toc-number">1.3.2.3.</span> <span class="toc-text">故障转移</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%93%A8%E5%85%B5%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA"><span class="toc-number">1.3.2.4.</span> <span class="toc-text">哨兵集群搭建</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E7%89%87%E9%9B%86%E7%BE%A4"><span class="toc-number">1.3.3.</span> <span class="toc-text">分片集群</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%A3%E5%88%97%E6%8F%92%E6%A7%BD"><span class="toc-number">1.3.3.1.</span> <span class="toc-text">散列插槽</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9B%86%E8%AE%AD%E4%BC%B8%E7%BC%A9"><span class="toc-number">1.3.3.2.</span> <span class="toc-text">集训伸缩</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2024/02/28/2024-2-28-Redis%E9%AB%98%E7%BA%A7-1-%E6%8C%81%E4%B9%85%E5%8C%96/" title="Redis高级(1) - 持久化"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310250011952.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis高级(1) - 持久化"/></a><div class="content"><a class="title" href="/2024/02/28/2024-2-28-Redis%E9%AB%98%E7%BA%A7-1-%E6%8C%81%E4%B9%85%E5%8C%96/" title="Redis高级(1) - 持久化">Redis高级(1) - 持久化</a><time datetime="2024-02-28T05:37:51.000Z" title="发表于 2024-02-28 13:37:51">2024-02-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/02/26/2024-2-26-Redis-%E7%A7%92%E6%9D%80%E7%AC%94%E8%AE%B01/" title="Redis秒杀代码(逐步测试修改)"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310250011952.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis秒杀代码(逐步测试修改)"/></a><div class="content"><a class="title" href="/2024/02/26/2024-2-26-Redis-%E7%A7%92%E6%9D%80%E7%AC%94%E8%AE%B01/" title="Redis秒杀代码(逐步测试修改)">Redis秒杀代码(逐步测试修改)</a><time datetime="2024-02-26T06:37:46.000Z" title="发表于 2024-02-26 14:37:46">2024-02-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/02/21/2024-2-21-Redis-%E7%A7%92%E6%9D%80%E7%AC%94%E8%AE%B01-copy/" title="Redis-秒杀笔记1"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202310250011952.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis-秒杀笔记1"/></a><div class="content"><a class="title" href="/2024/02/21/2024-2-21-Redis-%E7%A7%92%E6%9D%80%E7%AC%94%E8%AE%B01-copy/" title="Redis-秒杀笔记1">Redis-秒杀笔记1</a><time datetime="2024-02-21T14:48:53.000Z" title="发表于 2024-02-21 22:48:53">2024-02-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/01/19/2024-1-19-JVM%E8%B0%83%E4%BC%98-GC%E8%B0%83%E4%BC%98/" title="（JVM调优）GC调优"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="（JVM调优）GC调优"/></a><div class="content"><a class="title" href="/2024/01/19/2024-1-19-JVM%E8%B0%83%E4%BC%98-GC%E8%B0%83%E4%BC%98/" title="（JVM调优）GC调优">（JVM调优）GC调优</a><time datetime="2024-01-19T12:43:23.000Z" title="发表于 2024-01-19 20:43:23">2024-01-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/01/18/2024-1-18-JVM%E8%B0%83%E4%BC%98-%E5%86%85%E5%AD%98%E8%B0%83%E4%BC%98/" title="（JVM调优）内存调优"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202401152325670.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="（JVM调优）内存调优"/></a><div class="content"><a class="title" href="/2024/01/18/2024-1-18-JVM%E8%B0%83%E4%BC%98-%E5%86%85%E5%AD%98%E8%B0%83%E4%BC%98/" title="（JVM调优）内存调优">（JVM调优）内存调优</a><time datetime="2024-01-18T15:11:39.000Z" title="发表于 2024-01-18 23:11:39">2024-01-18</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2024 By 半岛Hantou</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="30" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && (location.pathname ==='/'|| '/' ==='all')){
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="width:100%;height: auto"><div id="catalog_magnet"><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/知识笔记/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">📚 半岛の知识笔记 (41)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/生活日常/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">💡 半岛の生活日常 (6)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/茶余饭后/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">🐱‍👓 半岛の茶余饭后 (3)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/算法学习/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">📒 半岛の算法学习 (26)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/优质转载/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">👩‍💻 半岛の优质转载 (2)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item"><a class="magnet_link" href="https://hantoul.github.io/categories/观影墙/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">🎥 半岛の观影墙 (1)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><a class="magnet_link_more"  href="https://hantoul.github.io/categories" style="flex:1;text-align: center;margin-bottom: 10px;">查看更多...</a></div></div>';
+    console.log('已挂载magnet')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script><style>#catalog_magnet{flex-wrap: wrap;display: flex;width:100%;justify-content:space-between;padding: 10px 10px 0 10px;align-content: flex-start;}.magnet_item{flex-basis: calc(50% - 5px);background: #f2f2f2;margin-bottom: 10px;border-radius: 8px;transition: all 0.2s ease-in-out;}.magnet_item:hover{background: #b30070}.magnet_link_more{color:#555}.magnet_link{color:black}.magnet_link:hover{color:white}@media screen and (max-width: 600px) {.magnet_item {flex-basis: 100%;}}.magnet_link_context{display:flex;padding: 10px;font-size:16px;transition: all 0.2s ease-in-out;}.magnet_link_context:hover{padding: 10px 20px;}</style>
+    <style></style><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'null'.split(',');
+  var cpage = location.pathname;
+  var epage = '/';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '114.32,30.35';
+  var clock_default_rectangle_enable = 'false';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><script data-pjax>
+  function butterfly_footer_beautify_injector_config(){
+    var parent_div_git = document.getElementById('footer-wrap');
+    var item_html = '<div id="workboard"></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v6.2.0" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Frame-Hexo-blue?style=flat&amp;logo=hexo" alt=""/></a><a class="github-badge" target="_blank" href="https://butterfly.js.org/" style="margin-inline:5px" data-title="主题版本Butterfly_v4.6.0" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Theme-Butterfly-6513df?style=flat&amp;logo=bitdefender" alt=""/></a><a class="github-badge" target="_blank" href="https://vercel.com/" style="margin-inline:5px" data-title="本站采用多线部署，主线路托管于Vercel" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Hosted-Vercel-brightgreen?style=flat&amp;logo=Vercel" alt=""/></a><a class="github-badge" target="_blank" href="https://dashboard.4everland.org/" style="margin-inline:5px" data-title="本站采用多线部署，备用线路托管于4EVERLAND" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Hosted-4EVERLAND-22DDDD?style=flat&amp;logo=IPFS" alt=""/></a><a class="github-badge" target="_blank" href="https://github.com/HantouL/HantouL.github.io" style="margin-inline:5px" data-title="本站项目由Github托管" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Source-Github-d021d6?style=flat&amp;logo=GitHub" alt=""/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Copyright-BY--NC--SA%204.0-d42328?style=flat&amp;logo=Claris" alt=""/></a></p>';
+    console.log('已挂载butterfly_footer_beautify')
+    parent_div_git.insertAdjacentHTML("beforeend",item_html)
+    }
+  var elist = 'null'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var flag = 0;
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_footer_beautify_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_footer_beautify_injector_config();
+  }
+  </script><script async src="/js/runtime.js"></script><script async src="//at.alicdn.com/t/font_2032782_8d5kxvn09md.js"></script><div class="js-pjax"><script async="async">var arr = document.getElementsByClassName('recent-post-item');
+for(var i = 0;i<arr.length;i++){
+    arr[i].classList.add('wow');
+    arr[i].classList.add('animate__zoomIn');
+    arr[i].setAttribute('data-wow-duration', '2s');
+    arr[i].setAttribute('data-wow-delay', '1s');
+    arr[i].setAttribute('data-wow-offset', '100');
+    arr[i].setAttribute('data-wow-iteration', '1');
+  }</script><script async="async">var arr = document.getElementsByClassName('card-widget');
+for(var i = 0;i<arr.length;i++){
+    arr[i].classList.add('wow');
+    arr[i].classList.add('animate__zoomIn');
+    arr[i].setAttribute('data-wow-duration', '');
+    arr[i].setAttribute('data-wow-delay', '');
+    arr[i].setAttribute('data-wow-offset', '');
+    arr[i].setAttribute('data-wow-iteration', '');
+  }</script></div><script defer src="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/wow.min.js"></script><script defer src="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/wow_init.js"></script><!-- hexo injector body_end end --></body></html>
