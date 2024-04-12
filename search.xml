@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>在短链接前后端联调时遇见由Feign引发的“奇怪”问题（Feign使用中对于Get请求自动变成Push引发的 Sharding value null must implements Comparable 报错的解决方法）</title>
+      <link href="/2024/04/12/2024-4-12-%E5%9C%A8%E7%9F%AD%E9%93%BE%E6%8E%A5%E5%89%8D%E5%90%8E%E7%AB%AF%E8%81%94%E8%B0%83%E6%97%B6%E9%81%87%E8%A7%81%E7%94%B1Feign%E5%BC%95%E5%8F%91%E7%9A%84%E2%80%9C%E5%A5%87%E6%80%AA%E2%80%9D%E9%97%AE%E9%A2%98/"/>
+      <url>/2024/04/12/2024-4-12-%E5%9C%A8%E7%9F%AD%E9%93%BE%E6%8E%A5%E5%89%8D%E5%90%8E%E7%AB%AF%E8%81%94%E8%B0%83%E6%97%B6%E9%81%87%E8%A7%81%E7%94%B1Feign%E5%BC%95%E5%8F%91%E7%9A%84%E2%80%9C%E5%A5%87%E6%80%AA%E2%80%9D%E9%97%AE%E9%A2%98/</url>
+      
+        <content type="html"><![CDATA[<h1 id="在短链接前后端联调时遇见由Feign引发的“奇怪”问题（Feign使用中对于Get请求自动变成Push引发的-Sharding-value-null-must-implements-Comparable-报错的解决方法）"><a href="#在短链接前后端联调时遇见由Feign引发的“奇怪”问题（Feign使用中对于Get请求自动变成Push引发的-Sharding-value-null-must-implements-Comparable-报错的解决方法）" class="headerlink" title="在短链接前后端联调时遇见由Feign引发的“奇怪”问题（Feign使用中对于Get请求自动变成Push引发的 Sharding value null must implements Comparable 报错的解决方法）"></a>在短链接前后端联调时遇见由Feign引发的“奇怪”问题（Feign使用中对于Get请求自动变成Push引发的 Sharding value null must implements Comparable 报错的解决方法）</h1><p>今天在做短链接系统的前后端联调，在前端查询短链接数据的时候发现了问题；</p><ul><li>在拉取<strong>短链接回收站</strong>和短链接分组中短链接数据时出现了异常，拉不到数据。回到后台日志中查看，发现是不支持Post方法</li></ul><p>对于短链接回收站的拉取异常，很快地就定位到了问题</p><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202404111937182.png" alt="image-20240411193722085">在哪显然这里是打错了，在用Feigin访问后管的时候，用错了方式</p><h2 id="既然两个基本一致的问题解决了一个，那另一个不是也差不多了？"><a href="#既然两个基本一致的问题解决了一个，那另一个不是也差不多了？" class="headerlink" title="既然两个基本一致的问题解决了一个，那另一个不是也差不多了？"></a>既然两个基本一致的问题解决了一个，那另一个不是也差不多了？</h2><p>这里就顺着之前的思路Debug，最后同样定位到了向后管发请求的地方，但是怎么都找不到是从哪里发的Post请求。</p><p>这时就觉得邪门了，哪里来的Post？？？</p><p>于是就试着把请求从<code>@GetMapping</code>改成了<code>@DeleteMapping</code>，居然又用Delete发了请求，这下邪门了。</p><blockquote><p>这里正好前一天晚上调试nacos的时候也遇见了<strong>玄学问题</strong></p><p>我在配置聚合服务注册到Nacos的服务名时怎么改都没有用，然后半夜折腾了一个多小时就放弃了睡觉了。然后今天一跑起来发现报错了，但是和昨天晚上报错不一样，原来是名称自己又改成我想要的名称了</p><p>敲代码，很神奇吧，我昨天也清空过Nacos缓存，重启过，但是并没有什么用。。。过了一个晚上自己就好了。。</p></blockquote><p>又试了下发现还是发PostMapping，然后就关电脑去吃饭跑步了，回来重启电脑发现还是不行。。。</p><p>在网上又搜不到相关的信息，所以又把请求打进来的路径逐一排除核实，最终将问题锁定到Feign中</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 分页查询短链接</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> 分页查询短链接请求返回实体</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@GetMapping(&quot;/api/shortlink/v1/page&quot;)</span></span><br><span class="line">Result&lt;Page&lt;ShortLinkPageRespDTO&gt;&gt; <span class="title function_">pageShortLink</span><span class="params">(<span class="meta">@RequestBody</span> ShortLinkPageReqDTO requestParam)</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure><p>再以 Feign Get 为关键字进行检索，发现若<strong>Feign中的Get请求若携带了RequestBody，就会自动转换成Post请求发送</strong></p><p>这里解决方法是将远程调用的调用端使用Post来发送请求，而为了保证外部传RestFul请求的语意，仍然使用Get来传入</p><blockquote><p>之所以之前的回收站能解决，是因为它用的是3个RequestParam；歪打正着了属于是</p><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202404112008304.png" alt="image-20240411200843247"></p></blockquote><h2 id="蒽，上面的解决方法是错的"><a href="#蒽，上面的解决方法是错的" class="headerlink" title="蒽，上面的解决方法是错的"></a>蒽，上面的解决方法是错的</h2><p>按照上面的方法再次进行调试，发现在聚合服务中，短链接后台向短链接中控发送请求时，将Post中的RequestBody丢弃了，然后ShardingSphere在查数据库的时候，由于在Params里面找不到分片键，所以报错了<code>Sharding value</code>null<code>must implements Comparable.</code>，我还以为是聚合服务的分片配错了，又浪费了半天debug</p><p>现在的解决方法非常粗暴，但是非常有效。。。。</p><p><img src="https://hantou-picbed.oss-cn-hangzhou.aliyuncs.com/img/202404112055475.png" alt="image-20240411205527424"></p><blockquote><p>这里注意分页查询回收站并没有实现OrderTag，可能会在分类排序中</p></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 知识笔记 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 项目部署 </tag>
+            
+            <tag> 运维 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Docker笔记（三）</title>
       <link href="/2024/03/14/2024-3-13-Docker%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%89%EF%BC%89/"/>
       <url>/2024/03/14/2024-3-13-Docker%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%89%EF%BC%89/</url>
@@ -459,8 +486,8 @@
     
     <entry>
       <title>两个月都没更新博客，这个人在干啥</title>
-      <link href="/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-copy-2/"/>
-      <url>/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-copy-2/</url>
+      <link href="/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
+      <url>/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
       
         <content type="html"><![CDATA[<p>好久没更新博客了，这一个多月确实是比较忙</p><p>陆陆续续每周都有考试要复习，还有软件的课设和数据库的Java课设要做，所以没更新博客了</p><p>刚好Java的项目最近基本做完了，现在会回复更新</p><p>已经24年啦，明天也是21岁生日，还是对前途没什么规划。。。</p><p>对考研没太大兴趣，就业现在环境又差，不知道该如何是好</p><p>总之先学着吧，干就完事了</p>]]></content>
       
@@ -478,8 +505,8 @@
     
     <entry>
       <title>两个月都没更新博客，这个人在干啥</title>
-      <link href="/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/"/>
-      <url>/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
+      <link href="/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-copy-2/"/>
+      <url>/2024/01/12/2023-11-17-%E7%AE%97%E6%B3%95%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-copy-2/</url>
       
         <content type="html"><![CDATA[<p>好久没更新博客了，这一个多月确实是比较忙</p><p>陆陆续续每周都有考试要复习，还有软件的课设和数据库的Java课设要做，所以没更新博客了</p><p>刚好Java的项目最近基本做完了，现在会回复更新</p><p>已经24年啦，明天也是21岁生日，还是对前途没什么规划。。。</p><p>对考研没太大兴趣，就业现在环境又差，不知道该如何是好</p><p>总之先学着吧，干就完事了</p>]]></content>
       
@@ -1114,9 +1141,9 @@
       
         <tags>
             
-            <tag> spirng-cloud </tag>
-            
             <tag> RocketMQ </tag>
+            
+            <tag> spirng-cloud </tag>
             
         </tags>
       
@@ -1141,9 +1168,9 @@
       
         <tags>
             
-            <tag> spirng-cloud </tag>
-            
             <tag> RocketMQ </tag>
+            
+            <tag> spirng-cloud </tag>
             
         </tags>
       
@@ -1218,9 +1245,9 @@
       
         <tags>
             
-            <tag> spirng-cloud </tag>
-            
             <tag> RocketMQ </tag>
+            
+            <tag> spirng-cloud </tag>
             
         </tags>
       
@@ -1245,9 +1272,9 @@
       
         <tags>
             
-            <tag> spirng-cloud </tag>
-            
             <tag> RocketMQ </tag>
+            
+            <tag> spirng-cloud </tag>
             
         </tags>
       
@@ -1927,25 +1954,6 @@
     
     
     <entry>
-      <title>优质转载测试</title>
-      <link href="/2023/01/19/2023-1-19-%E4%BC%98%E8%B4%A8%E8%BD%AC%E8%BD%BD/"/>
-      <url>/2023/01/19/2023-1-19-%E4%BC%98%E8%B4%A8%E8%BD%AC%E8%BD%BD/</url>
-      
-        <content type="html"><![CDATA[<h2 id="这是第一篇优质转载"><a href="#这是第一篇优质转载" class="headerlink" title="这是第一篇优质转载"></a>这是第一篇优质转载</h2>]]></content>
-      
-      
-      <categories>
-          
-          <category> 优质转载 </category>
-          
-      </categories>
-      
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>知识笔记测试</title>
       <link href="/2023/01/19/2023-1-19-%E7%9F%A5%E8%AF%86%E7%AC%94%E8%AE%B0/"/>
       <url>/2023/01/19/2023-1-19-%E7%9F%A5%E8%AF%86%E7%AC%94%E8%AE%B0/</url>
@@ -1956,6 +1964,25 @@
       <categories>
           
           <category> 知识笔记 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>优质转载测试</title>
+      <link href="/2023/01/19/2023-1-19-%E4%BC%98%E8%B4%A8%E8%BD%AC%E8%BD%BD/"/>
+      <url>/2023/01/19/2023-1-19-%E4%BC%98%E8%B4%A8%E8%BD%AC%E8%BD%BD/</url>
+      
+        <content type="html"><![CDATA[<h2 id="这是第一篇优质转载"><a href="#这是第一篇优质转载" class="headerlink" title="这是第一篇优质转载"></a>这是第一篇优质转载</h2>]]></content>
+      
+      
+      <categories>
+          
+          <category> 优质转载 </category>
           
       </categories>
       
